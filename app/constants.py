@@ -1,5 +1,3 @@
-#constants.py
-
 REDSNAKE = 2
 ADVSNAKE = 3
 
