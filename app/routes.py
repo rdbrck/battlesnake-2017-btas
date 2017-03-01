@@ -156,9 +156,9 @@ def move():
             while width_iterator < arenaWidth:
                 if arenaarray[height_iterator][width_iterator] >= 2 and height_iterator != RedSnakeY and width_iterator != RedSnakeX:
                     north_threat += 100 / (abs(width_iterator - RedSnakeX) + abs(height_iterator - RedSnakeY))
-                if RedSnakeData ["health"] < 70:
+                if RedSnakeData ["health_points"] < 70:
                     if arenaarray[height_iterator][width_iterator] == 1:
-                        north_threat -= 100 / (abs(width_iterator - RedSnakeX) + abs(height_iterator - RedSnakeY))
+                        north_threat -= 1000 / (abs(width_iterator - RedSnakeX) + abs(height_iterator - RedSnakeY))
                 width_iterator += 1
             height_iterator += 1
 
@@ -189,9 +189,9 @@ def move():
             while height_iterator < arenaHeight - 1:
                 if arenaarray[height_iterator][width_iterator] >= 2 and height_iterator != RedSnakeY and width_iterator != RedSnakeX:
                     east_threat += 100 / (abs(width_iterator - RedSnakeX) + abs(height_iterator - RedSnakeY))
-                if RedSnakeData ["health"] < 70:
+                if RedSnakeData ["health_points"] < 70:
                     if arenaarray[height_iterator][width_iterator] == 1:
-                        east_threat -= 100 / (abs(width_iterator - RedSnakeX) + abs(height_iterator - RedSnakeY))
+                        east_threat -= 1000 / (abs(width_iterator - RedSnakeX) + abs(height_iterator - RedSnakeY))
                 height_iterator += 1
             width_iterator += 1
 
@@ -221,9 +221,9 @@ def move():
             while height_iterator < arenaHeight - 1:
                 if arenaarray[height_iterator][width_iterator] >= 2 and height_iterator != RedSnakeY and width_iterator != RedSnakeX:
                     west_threat += 100 / (abs(width_iterator - RedSnakeX) + abs(height_iterator - RedSnakeY))
-                if RedSnakeData ["health"] < 70:
+                if RedSnakeData ["health_points"] < 70:
                     if arenaarray[height_iterator][width_iterator] == 1:
-                        west_threat -= 100 / (abs(width_iterator - RedSnakeX) + abs(height_iterator - RedSnakeY))
+                        west_threat -= 1000 / (abs(width_iterator - RedSnakeX) + abs(height_iterator - RedSnakeY))
                 height_iterator += 1
             width_iterator += 1
 
@@ -253,9 +253,9 @@ def move():
             while width_iterator < arenaWidth - 1:
                 if arenaarray[height_iterator][width_iterator] >= 2 and height_iterator != RedSnakeY and width_iterator != RedSnakeX:
                     south_threat += 100 / (abs(width_iterator - RedSnakeX) + abs(height_iterator - RedSnakeY))
-                if RedSnakeData ["health"] < 70:
+                if RedSnakeData ["health_points"] < 70:
                     if arenaarray[height_iterator][width_iterator] == 1:
-                        south_threat -= 100 / (abs(width_iterator - RedSnakeX) + abs(height_iterator - RedSnakeY))
+                        south_threat -= 1000 / (abs(width_iterator - RedSnakeX) + abs(height_iterator - RedSnakeY))
                 width_iterator += 1
             height_iterator += 1
 
@@ -265,32 +265,32 @@ def move():
        if east_threat > west_threat:
             if north_threat < west_threat:
                 print 'want to move north'
-                move = 'north'
+                move = 'up'
             else:
                 print 'want to move west'
-                move = 'west'
+                move = 'left'
        else:
             if north_threat < east_threat:
                 print 'want to move north'
-                move = 'north'
+                move = 'up'
             else:
                 print 'want to move east'
-                move = 'east'
+                move = 'right'
     else:
         if east_threat > west_threat:
             if south_threat < west_threat:
                 print 'want to move south'
-                move = 'south'
+                move = 'down'
             else:
                 print 'want to move west'
-                move = 'west'
+                move = 'left'
         else:
             if south_threat < east_threat:
                 print 'want to move south'
-                move = 'south'
+                move = 'down'
             else:
                 print 'want to move east'
-                move = 'east'
+                move = 'right'
 
     #print "\n\n"
     #print arenaarray
