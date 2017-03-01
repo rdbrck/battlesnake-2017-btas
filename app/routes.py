@@ -36,7 +36,7 @@ def move():
 
     SnakeList = data["snakes"]
     for iterator2 in SnakeList:
-        if iterator2["name"] == "basesnake":
+        if iterator2["name"] == "Rdbrck-Python":
             RedSnakeData = iterator2
             for square in iterator2["coords"]:
                 arenaarray[square[1]][square[0]] = 2
