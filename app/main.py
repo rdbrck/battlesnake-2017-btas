@@ -64,34 +64,33 @@ def move():
     arenaWidth = data["width"]
     arenaHeight = data["height"]
 
+    """
+    #---------------------------------------------------------------------------------------
+    #Run Floodfill on on a move to the North
+    #---------------------------------------------------------------------------------------
 
+    #print arenaarray
+    #print "\n\n"
 
-#---------------------------------------------------------------------------------------
-#Run Floodfill on on a move to the North
-#---------------------------------------------------------------------------------------
+    #northVal = floodfill_start(3, len(RedSnakeData["coords"]), 0, arenaarray, RedSnakeX, RedSnakeY - 1, RedSnakeData, constants.REDSNAKE, arenaWidth, arenaHeight)
+    #print 'paths north'
+    #print northVal
+    #Run Floodfill on on a move to the East
+    #---------------------------------------------------------------------------------------
 
-    print arenaarray
-    print "\n\n"
+    #eastVal = floodfill_start(3, len(RedSnakeData["coords"]), 0, arenaarray, RedSnakeX + 1, RedSnakeY, RedSnakeData, constants.REDSNAKE, arenaWidth, arenaHeight)
+    #print 'paths east'
+    #print eastVal
+    #---------------------------------------------------------------------------------------
+    #Run Floodfill on on a move to the West
+    #---------------------------------------------------------------------------------------
 
-    northVal = floodfill_start(3, len(RedSnakeData["coords"]), 0, arenaarray, RedSnakeX, RedSnakeY - 1, RedSnakeData, constants.REDSNAKE, arenaWidth, arenaHeight)
-    print 'paths north'
-    print northVal
-#Run Floodfill on on a move to the East
-#---------------------------------------------------------------------------------------
-
-    eastVal = floodfill_start(3, len(RedSnakeData["coords"]), 0, arenaarray, RedSnakeX + 1, RedSnakeY, RedSnakeData, constants.REDSNAKE, arenaWidth, arenaHeight)
-    print 'paths east'
-    print eastVal
-#---------------------------------------------------------------------------------------
-#Run Floodfill on on a move to the West
-#---------------------------------------------------------------------------------------
-
-    westVal = floodfill_start(3, len(RedSnakeData["coords"]), 0, arenaarray, RedSnakeX - 1, RedSnakeY, RedSnakeData, constants.REDSNAKE, arenaWidth, arenaHeight)
-    print 'paths west'
-    print westVal
-#---------------------------------------------------------------------------------------
-#Run Floodfill on on a move to the South
-#---------------------------------------------------------------------------------------
+    #westVal = floodfill_start(3, len(RedSnakeData["coords"]), 0, arenaarray, RedSnakeX - 1, RedSnakeY, RedSnakeData, constants.REDSNAKE, arenaWidth, arenaHeight)
+    #print 'paths west'
+    #print westVal
+    #---------------------------------------------------------------------------------------
+    #Run Floodfill on on a move to the South
+    #---------------------------------------------------------------------------------------
 
     southVal = floodfill_start(3, len(RedSnakeData["coords"]), 0, arenaarray, RedSnakeX, RedSnakeY + 1, RedSnakeData, constants.REDSNAKE, arenaWidth, arenaHeight)
     print 'paths south'
@@ -127,9 +126,9 @@ def move():
                 print southVal + 1
             else:
                 print 'east tree'
-                print eastVal + 1
+                print eastVal + 1"""
 
-#calculate threat north
+    #calculate threat north
     height_iterator = 0
     width_iterator = 0
     north_threat = 0
@@ -316,7 +315,7 @@ def move():
     #If two branches are tied, should choose the safest direction.
 
 def floodfill(depth, direction, length, pathlength, arena, localSnakeX, localSnakeY, snakeData, snakeNumber, width, height):
-    
+
     localArena = deepcopy(arena)
 #---------------------------------------------------------------------------------------
 #Build local Arena, if not moving into food, then remove from tail.
@@ -372,7 +371,7 @@ def floodfill(depth, direction, length, pathlength, arena, localSnakeX, localSna
 #---------------------------------------------------------------------------------------
 #Add Move to the LocalArena
 #---------------------------------------------------------------------------------------
-    else:    
+    else:
         if direction == constants.NORTH:
             #add the move to the localArena
             localArena [localSnakeY - 1][localSnakeX] = snakeNumber
