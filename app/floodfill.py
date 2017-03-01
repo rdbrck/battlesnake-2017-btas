@@ -1,4 +1,5 @@
 import constants
+from checks import invalidmove_wall, invalidmove
 
 from copy import deepcopy
 
