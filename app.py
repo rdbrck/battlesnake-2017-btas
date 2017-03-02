@@ -1,7 +1,7 @@
-from app import application
-
-import bottle
 import os
+import bottle
+
+from app import application
 
 if __name__ == "__main__":
     bottle.run(

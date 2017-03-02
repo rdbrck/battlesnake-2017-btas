@@ -1,22 +1,16 @@
-from constants import TAUNTS
+from constants import TAUNTS, SNAKE_NAME
 from entities import Snake, Board
 
 import random
 import bottle
 import operator
 
-
 global RedSnake
 global GameBoard
-
-
-SNAKE_NAME = 'Rdbrck-Python'
-
 
 @bottle.route('/static/<path:path>')
 def static(path):
     return bottle.static_file(path, root='static/')
-
 
 @bottle.route('/')
 @bottle.post('/start')
@@ -28,14 +22,10 @@ def start():
         'head_url': ('http://%s/static/head.png' % bottle.request.get_header('host'))
     }
 
-
 @bottle.post('/move')
 def move():
     data = bottle.request.json
 
-    #
-    # GATHER REQUEST DATA
-    #
     GameBoard = Board(**data)
     RedSnake = GameBoard.get_snake(data['you'])
     print GameBoard.format()
@@ -115,7 +105,6 @@ def move():
             width_iterator += 1
 
     print east_threat
-
 
     # calculate threat west
     height_iterator = 0

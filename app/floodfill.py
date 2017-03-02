@@ -103,7 +103,7 @@ def floodfill(depth, direction, length, pathlength, arena, localSnakeX, localSna
             northval = 0
 
             if direction == constants.NORTH:
-               northval = floodfill_start(depth, length, pathlength, localArena, localSnakeX, localSnakeY - 1, snakeData, snakeNumber, width, height)
+                northval = floodfill_start(depth, length, pathlength, localArena, localSnakeX, localSnakeY - 1, snakeData, snakeNumber, width, height)
 #Run Floodfill on on a move to the East
 #---------------------------------------------------------------------------------------
             elif direction == constants.EAST:
