@@ -1,10 +1,11 @@
-from constants import TAUNTS
+from constants import TAUNTS, SNAKE_NAME
+from entities import Snake, Board
 
 import random
 import bottle
 
-global RedSnakeData
-
+global RedSnake
+global GameBoard
 
 @bottle.route('/static/<path:path>')
 def static(path):
@@ -15,8 +16,8 @@ def static(path):
 def start():
     return {
         'color': '#BADA55',
-        'taunt': TAUNTS[random.randint(0, len(TAUNTS)-1)],
-        'name': 'Rdbrck-Python',
+        'taunt': random.choice(TAUNTS),
+        'name': SNAKE_NAME,
         'head_url': ('http://%s/static/head.png' % bottle.request.get_header('host'))
     }
 
@@ -24,35 +25,16 @@ def start():
 def move():
     data = bottle.request.json
 
-    #
-    # GATHER REQUEST DATA
-    #
-    arenaarray = [[0 for x in range(data["width"])] for y in range(data["height"])]
-    for iterator in data["food"]:
-        arenaarray [iterator[1]][iterator[0]] = 1
+    GameBoard = Board(**data)
+    RedSnake = GameBoard.get_snake(data['you'])
+    print GameBoard.format()
 
-    SnakeList = data["snakes"]
-    print SnakeList
-
-    for iterator2 in SnakeList:
-        if iterator2["name"] == "Rdbrck-Python":
-            RedSnakeData = iterator2
-            for square in iterator2["coords"]:
-                arenaarray[square[1]][square[0]] = 2
-        else:
-            for square in iterator2["coords"]:
-                arenaarray[square[1]][square[0]] = 3
-
-
-    RedSnakeX = RedSnakeData["coords"][0][0]
-    RedSnakeY = RedSnakeData["coords"][0][1]
-    arenaWidth = data["width"]
-    arenaHeight = data["height"]
-
-
-    #
-    # GATHER SECONDARY INFORMATION
-    #
+    # TODO: Remove these variables and replace them throughout code
+    RedSnakeX = list(RedSnake.head)[0]
+    RedSnakeY = list(RedSnake.head)[1]
+    arenaarray = GameBoard.cells
+    arenaWidth = GameBoard.width
+    arenaHeight = GameBoard.height
 
     # calculate threat north
     height_iterator = 0
@@ -63,7 +45,7 @@ def move():
     if north_boundary_distance <= 0:
         #print 'I think i am at north wall'
         north_threat = 1000000
-    elif arenaarray[RedSnakeY - 1][RedSnakeX] > 1:
+    elif arenaarray[RedSnakeY - 1][RedSnakeX] == 1:
         #print 'I think theres something to my north'
         north_threat = 1000000
     else:
@@ -72,11 +54,11 @@ def move():
         while height_iterator < RedSnakeY:
             width_iterator = 0
             while width_iterator < arenaWidth:
-                if arenaarray[height_iterator][width_iterator] >= 2 and height_iterator != RedSnakeY and width_iterator != RedSnakeX:
+                if arenaarray[height_iterator][width_iterator] == 1 and height_iterator != RedSnakeY and width_iterator != RedSnakeX:
                     north_threat += 100 / (abs(width_iterator - RedSnakeX) + abs(height_iterator - RedSnakeY))
-                if RedSnakeData ["health_points"] < 70:
-                    if arenaarray[height_iterator][width_iterator] == 1:
-                        north_threat -= (100000 / RedSnakeData ["health_points"]) / (abs(width_iterator - RedSnakeX) + abs(height_iterator - RedSnakeY))
+                if RedSnake.attributes["health_points"] < 70:
+                    if arenaarray[height_iterator][width_iterator] == 2:
+                        north_threat -= (100000 / RedSnake.attributes["health_points"]) / (abs(width_iterator - RedSnakeX) + abs(height_iterator - RedSnakeY))
                 width_iterator += 1
             height_iterator += 1
 
@@ -92,7 +74,7 @@ def move():
     if east_boundary_distance <= 0:
         east_threat = 1000000
         #print 'I think i am at east wall'
-    elif arenaarray[RedSnakeY][RedSnakeX + 1] > 1:
+    elif arenaarray[RedSnakeY][RedSnakeX + 1] == 1:
         east_threat = 1000000
         #print 'I think my east square is filled'
     else:
@@ -101,16 +83,15 @@ def move():
         while width_iterator < arenaWidth - 1:
             height_iterator = 0
             while height_iterator < arenaHeight - 1:
-                if arenaarray[height_iterator][width_iterator] >= 2 and height_iterator != RedSnakeY and width_iterator != RedSnakeX:
+                if arenaarray[height_iterator][width_iterator] == 1 and height_iterator != RedSnakeY and width_iterator != RedSnakeX:
                     east_threat += 100 / (abs(width_iterator - RedSnakeX) + abs(height_iterator - RedSnakeY))
-                if RedSnakeData ["health_points"] < 70:
-                    if arenaarray[height_iterator][width_iterator] == 1:
-                        east_threat -= (100000 / RedSnakeData ["health_points"]) / (abs(width_iterator - RedSnakeX) + abs(height_iterator - RedSnakeY))
+                if RedSnake.attributes["health_points"] < 70:
+                    if arenaarray[height_iterator][width_iterator] == 2:
+                        east_threat -= (100000 / RedSnake.attributes["health_points"]) / (abs(width_iterator - RedSnakeX) + abs(height_iterator - RedSnakeY))
                 height_iterator += 1
             width_iterator += 1
 
     print east_threat
-
 
     # calculate threat west
     height_iterator = 0
@@ -121,7 +102,7 @@ def move():
     if west_boundary_distance <= 0:
         west_threat = 1000000
         #print 'I think I am at west wall'
-    elif arenaarray[RedSnakeY][RedSnakeX - 1] > 1:
+    elif arenaarray[RedSnakeY][RedSnakeX - 1] == 1:
         west_threat = 1000000
         #print 'I think west square is filled'
     else:
@@ -130,11 +111,11 @@ def move():
         while width_iterator <RedSnakeX:
             height_iterator = 0
             while height_iterator < arenaHeight - 1:
-                if arenaarray[height_iterator][width_iterator] >= 2 and height_iterator != RedSnakeY and width_iterator != RedSnakeX:
+                if arenaarray[height_iterator][width_iterator] == 1 and height_iterator != RedSnakeY and width_iterator != RedSnakeX:
                     west_threat += 100 / (abs(width_iterator - RedSnakeX) + abs(height_iterator - RedSnakeY))
-                if RedSnakeData ["health_points"] < 70:
-                    if arenaarray[height_iterator][width_iterator] == 1:
-                        west_threat -= (100000 / RedSnakeData ["health_points"]) / (abs(width_iterator - RedSnakeX) + abs(height_iterator - RedSnakeY))
+                if RedSnake.attributes["health_points"] < 70:
+                    if arenaarray[height_iterator][width_iterator] == 2:
+                        west_threat -= (100000 / RedSnake.attributes["health_points"]) / (abs(width_iterator - RedSnakeX) + abs(height_iterator - RedSnakeY))
                 height_iterator += 1
             width_iterator += 1
 
@@ -146,11 +127,11 @@ def move():
     width_iterator =0
     south_threat = 0
 
-    south_boundary_distance = arenaHeight  - 1 - RedSnakeY
+    south_boundary_distance = arenaHeight - 1 - RedSnakeY
     if south_boundary_distance <= 0:
         south_threat = 1000000
         #print 'I think I am at south wall'
-    elif arenaarray[RedSnakeY + 1][RedSnakeX] > 1:
+    elif arenaarray[RedSnakeY + 1][RedSnakeX] == 1:
         south_threat = 1000000
         #print 'I think my south square is filled'
     else:
@@ -159,11 +140,11 @@ def move():
         while height_iterator < arenaHeight - 1:
             width_iterator = 0
             while width_iterator < arenaWidth - 1:
-                if arenaarray[height_iterator][width_iterator] >= 2 and height_iterator != RedSnakeY and width_iterator != RedSnakeX:
+                if arenaarray[height_iterator][width_iterator] == 1 and height_iterator != RedSnakeY and width_iterator != RedSnakeX:
                     south_threat += 100 / (abs(width_iterator - RedSnakeX) + abs(height_iterator - RedSnakeY))
-                if RedSnakeData ["health_points"] < 70:
-                    if arenaarray[height_iterator][width_iterator] == 1:
-                        south_threat -= (100000 / RedSnakeData ["health_points"]) / (abs(width_iterator - RedSnakeX) + abs(height_iterator - RedSnakeY))
+                if RedSnake.attributes["health_points"] < 70:
+                    if arenaarray[height_iterator][width_iterator] == 2:
+                        south_threat -= (100000 / RedSnake.attributes["health_points"]) / (abs(width_iterator - RedSnakeX) + abs(height_iterator - RedSnakeY))
                 width_iterator += 1
             height_iterator += 1
 
@@ -207,5 +188,5 @@ def move():
 
     return {
         'move': move,
-        'taunt': TAUNTS[random.randint(0, len(TAUNTS)-1)]
+        'taunt': random.choice(TAUNTS)
     }

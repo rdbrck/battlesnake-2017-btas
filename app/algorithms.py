@@ -2,6 +2,7 @@ import collections
 import heapq
 import time
 
+from collections import deque
 from utils import neighbours, dist
 
 def flood_fill(vacant_func, start_pos, allow_start_in_occupied_cell=False):
@@ -77,6 +78,42 @@ def astar(vacant_func, start_pos, goal_pos, allow_start_in_occupied_cell=False):
 
     return None
 
+# todo fix me so I don't actually use the board
+def bfs(x, y, board):
+    """ BFS implementation to search for path to food
+
+        :param x: starting x coordinate
+        :param y: starting y coordinate
+        :param board: the board state
+    """
+
+    def get_path_from_nodes(node):
+        path = []
+        while(node != None):
+            path.append((node[0], node[1]))
+            node = node[2]
+
+        return path
+
+    board[x][y] = 0
+    queue = deque([(x, y, None)])
+
+    while len(queue) > 0:
+        node = queue.popleft()
+        x = node[0]
+        y = node[1]
+
+        if board[x][y] == 2: # If we reach food
+            return get_path_from_nodes(node) # Rebuild path
+
+        if (board[x][y] != 0):
+            continue
+
+        board[x][y]= -1 # Mark as explored
+        for i in neighbours(node):
+            queue.append((i[0], i[1] ,node))
+
+    return []
 
 def _longest_path(vacant_func, current, open_set, current_path, longest_path, deadline):
     if time.time() > deadline:
