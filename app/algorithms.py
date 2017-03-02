@@ -123,6 +123,7 @@ def find_safe_position(current_position, direction, board):
 
     return (0, 0)
 
+
 def fast_find_safest_position(current_position, direction, board):
     # the whole board
     m_bounds = [(0, 0), (board.width, board.height)]
@@ -182,11 +183,6 @@ def fast_find_safest_position(current_position, direction, board):
         bounds = [(0, 0), (current_position[0], board.height)]
 
     return _find_safest(bounds, bounds[0])
-
-    # bounds =
-
-
-
 
 
 def bfs(starting_position, target_position, board):

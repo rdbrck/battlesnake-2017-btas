@@ -2,7 +2,7 @@ from constants import TAUNTS, SNAKE_NAME, PING
 from entities import Snake, Board
 from strategy import general_direction
 from utils import timing
-from algorithms import bfs
+from algorithms import bfs, fast_find_safest_position
 
 import random
 import bottle
@@ -29,25 +29,24 @@ def start():
 def move():
     time_remaining = [150]
 
-    with timing(time_remaining):
+    with timing("bottle shit", time_remaining):
         data = bottle.request.json
 
-    print time_remaining[0]
+    with timing("data parsing", time_remaining):
+        board = Board(**data)
+        snake = board.get_snake(data['you'])
 
-    with timing(time_remaining):
-        GameBoard = Board(**data)
-        RedSnake = GameBoard.get_snake(data['you'])
+        ignore_food = (snake.attributes['health_points'] > 60)
+        direction = general_direction(board, snake.head, ignore_food)
 
-        ignore_food = (RedSnake.attributes['health_points'] > 60)
-        move = general_direction(GameBoard, RedSnake.head, ignore_food)
+    with timing("fast_find_safest_position", time_remaining):
+        go_to_position = fast_find_safest_position(snake.head, direction, board)
 
-    a = bfs((0, 0), (15, 15), GameBoard)
-
-    if time_remaining[0] > 145:
-        print time_remaining[0]
+    # if time_remaining[0] > 145:
+        # print time_remaining[0]
         # TODO: DO BETTER STUFF HERE
 
     return {
-        'move': move,
+        'move': direction,
         'taunt': random.choice(TAUNTS)
     }
