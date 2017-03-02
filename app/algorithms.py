@@ -1,11 +1,13 @@
 import collections
 import heapq
 import time
+import random
 
 from collections import deque
 
-from utils import neighbours, surrounding, dist, mul, timing
+from utils import neighbours, surrounding, dist, mul, sub, timing
 from constants import DIR_NAMES, DIR_VECTORS, FOOD, EMPTY, SNAKE
+from math import floor, ceil
 
 from copy import copy, deepcopy
 
@@ -82,6 +84,13 @@ def astar(vacant_func, start_pos, goal_pos, allow_start_in_occupied_cell=False):
 
     return None
 
+def _rate_cell(cell, board):
+    # get surrounding cells
+    cells = map(lambda cell: None if board.outside(cell) else board.get_cell(cell), surrounding(cell))
+    cells = filter(lambda cell: cell is not None, cells) # filter outside board
+    # [0.5, -1, 2] = [EMPTY, SNAKE, FOOD]
+    return reduce(lambda carry, cell: carry + [0.5, -1, 2][cell], cells, 0)
+
 def find_safe_position(current_position, direction, board):
     """ find a safe position in the direction :param direction: from
         :current_position: (usually the position of our snake's head
@@ -95,19 +104,12 @@ def find_safe_position(current_position, direction, board):
             print '|' + ' '.join(["%0.1f" % board[x][y] for x in range(len(board[y]))]) + '|';
         print # newline
 
-    def _rate_cell(cell):
-        # get surrounding cells
-        cells = map(lambda cell: None if board.outside(cell) else board.get_cell(cell), surrounding(cell))
-        cells = filter(lambda cell: cell is not None, cells) # filter outside board
-        # [0.5, -1, 2] = [EMPTY, SNAKE, FOOD]
-        return reduce(lambda carry, cell: carry + [0.5, -1, 2][cell], cells, 0)
-
     direction_vector = DIR_VECTORS[DIR_NAMES.index(direction)]
     opposite_vector = mul(direction_vector, (-1, -1))
 
     board_ratings = [
         [
-            _rate_cell((x, y))
+            _rate_cell((x, y), board)
             for y in range(board.height)
         ] for x in range(board.width)
     ]
@@ -121,14 +123,82 @@ def find_safe_position(current_position, direction, board):
 
     return (0, 0)
 
-# todo fix me so I don't actually use the board
-# Example: bfs((0,0), (2,2), board) will return [(0,0), (0,1), (0,2), (1,2), (2,2)]
+def fast_find_safest_position(current_position, direction, board):
+    # the whole board
+    m_bounds = [(0, 0), (board.width, board.height)]
+    max_depth = 10
+
+    def _find_safest(bounds = m_bounds, offset = (0, 0), depth = 0):
+        sector_width = (bounds[1][0] - bounds[0][0])
+        sector_height = (bounds[1][1] - bounds[0][1])
+
+        center_point = (
+            int(offset[0] + floor(sector_width / 2)),
+            int(offset[1] + floor(sector_height / 2))
+        )
+
+        if depth == max_depth or (sector_height * sector_width <= 1): return center_point
+        else:
+            surrounding_ratings = [
+                ((cell[0], cell[1]), _rate_cell((cell[0], cell[1]), board))
+                for cell in surrounding(center_point)
+            ]
+
+            # randomize to remove bias towards last in surrounding list
+            random.shuffle(surrounding_ratings)
+
+            go_torwards, rating = reduce(lambda carry, cell: cell if cell[1] > carry[1] else carry, surrounding_ratings)
+            direction_vector = sub(go_torwards, center_point)
+
+            # diagnal
+            if abs(direction_vector[0]) == abs(direction_vector[1]):
+                direction_vector = list(direction_vector) # tuples are immutable
+                direction_vector[int(time.time()) % 2] = 0 # 300% faster than random.randint()
+                direction_vector = tuple(direction_vector) # back to tuple because DIR_VECTOR contains tuples
+
+            direction = DIR_NAMES[DIR_VECTORS.index(direction_vector)]
+
+            if direction == "up":
+                new_bounds = [offset, (bounds[1][0], bounds[1][1])]
+            elif direction == "down":
+                offset = (offset[0], center_point[1])
+                new_bounds = [offset, (bounds[1][0], bounds[1][1])]
+            elif direction == "left":
+                new_bounds = [offset, (center_point[0], bounds[1][1])]
+            else: # right
+                offset = (center_point[0], offset[1])
+                new_bounds = [offset, (bounds[0][0], bounds[1][1])]
+
+            return _find_safest(new_bounds, offset, depth + 1)
+
+    # set up initial bounds
+    if direction == "up":
+        bounds = [(0, 0), (board.width, current_position[1])]
+    elif direction == "down":
+        bounds = [(0, current_position[1]), (board.width, board.height)]
+    elif direction == "right":
+        bounds = [(current_position[0], 0), (board.width, board.height)]
+    else: # left
+        bounds = [(0, 0), (current_position[0], board.height)]
+
+    return _find_safest(bounds, bounds[0])
+
+    # bounds =
+
+
+
+
+
 def bfs(starting_position, target_position, board):
     """ BFS implementation to search for path to food
 
         :param starting_position: starting position
         :param target_position: target position
         :param board: the board state
+
+        example:
+
+        bfs((0,0), (2,2), board) -> [(0,0), (0,1), (0,2), (1,2), (2,2)]
     """
 
     def get_path_from_nodes(node):
@@ -162,6 +232,7 @@ def bfs(starting_position, target_position, board):
                 queue.append((i[0], i[1], node))
 
     return None # No path
+
 
 def _longest_path(vacant_func, current, open_set, current_path, longest_path, deadline):
     if time.time() > deadline:
@@ -221,3 +292,6 @@ if __name__ == "__main__":
 
     with timing("find_safe_position", [200]):
         print find_safe_position(snake.head, "down", board)
+
+    with timing("fast_find_safest_position", [200]):
+        print fast_find_safest_position(snake.head, "right", board)
