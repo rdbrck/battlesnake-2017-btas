@@ -123,11 +123,11 @@ def find_safe_position(current_position, direction, board):
 
 # todo fix me so I don't actually use the board
 # Example: bfs((0,0), (2,2), board) will return [(0,0), (0,1), (0,2), (1,2), (2,2)]
-def bfs(currPos, targetPos, board):
+def bfs(starting_position, target_position, board):
     """ BFS implementation to search for path to food
 
-        :param x: starting x coordinate
-        :param y: starting y coordinate
+        :param starting_position: starting position
+        :param target_position: target position
         :param board: the board state
     """
 
@@ -139,27 +139,27 @@ def bfs(currPos, targetPos, board):
 
         return path
 
-    x = currPos[0];
-    y = currPos[1];
-    boardCopy = deepcopy(board);
-    boardCopy.set_cell((x, y), 0)
+    x = starting_position[0]
+    y = starting_position[1]
+    board_copy = deepcopy(board)
+    board_copy.set_cell((x, y), 0)
     queue = deque([(x, y, None)])
 
     while len(queue) > 0:
         node = queue.popleft()
         x = node[0]
         y = node[1]
-        if boardCopy.inside((x, y)):
-            if (x,y) == targetPos: # If we reach food
+        if board_copy.inside((x, y)):
+            if (x, y) == target_position: # If we reach target_position
                 return get_path_from_nodes(node) # Rebuild path
 
-            if not boardCopy.vacant((x, y)): # Snakes
+            if not board_copy.vacant((x, y)): # Snakes
                 continue
 
-            boardCopy.set_cell((x, y), -1) # Mark as explored
+            board_copy.set_cell((x, y), -1) # Mark as explored
 
             for i in neighbours(node):
-                queue.append((i[0], i[1] ,node))
+                queue.append((i[0], i[1], node))
 
     return None # No path
 
@@ -219,5 +219,5 @@ if __name__ == "__main__":
         board = Board(**data)
         snake = board.get_snake(data['you'])
 
-    with timing("find_safe_position"):
+    with timing("find_safe_position", [200]):
         print find_safe_position(snake.head, "down", board)
