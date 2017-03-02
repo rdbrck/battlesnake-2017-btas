@@ -5,6 +5,7 @@ from utils import timing
 
 import random
 import bottle
+import json
 
 
 @bottle.route('/static/<path:path>')
@@ -25,23 +26,23 @@ def start():
 
 @bottle.post('/move')
 def move():
-    # Timing Setup
-    time_remaining = [200]
-    time_remaining[0] = time_remaining[0] - 50
-    #Timing Example
-    # with timing ("testing timing function", time_remaining):
-    #     loop = 0
-    #     while loop < 100000:
-    #         loop = loop + 1
-    # print time_remaining
+    time_remaining = [150]
 
-    data = bottle.request.json
+    with timing(time_remaining):
+        data = bottle.request.body
 
-    GameBoard = Board(**data)
-    RedSnake = GameBoard.get_snake(data['you'])
+    print time_remaining[0]
 
-    ignore_food = (RedSnake.attributes['health_points'] > 60)
-    move = general_direction(GameBoard, RedSnake.head, ignore_food)
+    with timing(time_remaining):
+        GameBoard = Board(**data)
+        RedSnake = GameBoard.get_snake(data['you'])
+
+        ignore_food = (RedSnake.attributes['health_points'] > 60)
+        move = general_direction(GameBoard, RedSnake.head, ignore_food)
+
+    if time_remaining[0] > 145:
+        print time_remaining[0]
+        # TODO: DO BETTER STUFF HERE
 
     return {
         'move': move,
