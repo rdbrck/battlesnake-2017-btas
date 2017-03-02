@@ -84,52 +84,23 @@ def astar(vacant_func, start_pos, goal_pos, allow_start_in_occupied_cell=False):
 
     return None
 
-def _rate_cell(cell, board):
-    # get surrounding cells
-    cells = map(lambda cell: None if board.outside(cell) else board.get_cell(cell), surrounding(cell))
-    cells = filter(lambda cell: cell is not None, cells) # filter outside board
-    # [0.5, -1, 2] = [EMPTY, SNAKE, FOOD]
-    return reduce(lambda carry, cell: carry + [0.5, -1, 2][cell], cells, 0)
+def _rate_cell(cell, board, depth = 0):
+    cells = filter(lambda cell: board.inside(cell), surrounding(cell))
+    cells = map(lambda cell: (cell, board.get_cell(cell)), cells)
+    cell_value = reduce(lambda carry, cell: carry + [0.5, -1, 2][cell[1]], cells, 0)
 
-def find_safe_position(current_position, direction, board):
-    """ find a safe position in the direction :param direction: from
-        :current_position: (usually the position of our snake's head
-
-        :param current_position: current_position -> (x, y) tuple
-        :param direction: direction -> one of ["up", "down", "left", "right"]
-        :param board: board -> the current board"""
-
-    def _print_board(board):
-        for y in range(len(board)):
-            print '|' + ' '.join(["%0.1f" % board[x][y] for x in range(len(board[y]))]) + '|';
-        print # newline
-
-    direction_vector = DIR_VECTORS[DIR_NAMES.index(direction)]
-    opposite_vector = mul(direction_vector, (-1, -1))
-
-    board_ratings = [
-        [
-            _rate_cell((x, y), board)
-            for y in range(board.height)
-        ] for x in range(board.width)
-    ]
-
-    _print_board(board.cells)
-    _print_board(board_ratings)
-
-    #for x in range(board.width):
-    #    for y in range(board.height):
-    #        cell = board.get_cell((x, y))
-
-    return (0, 0)
-
+    if depth >= 2: return cell_value
+    else: return cell_value + sum([
+        _rate_cell(m_cell, board, depth + 1) / 10
+        for m_cell in surrounding(cell)
+    ])
 
 def fast_find_safest_position(current_position, direction, board):
     # the whole board
     m_bounds = [(0, 0), (board.width, board.height)]
     max_depth = 10
 
-    def _find_safest(bounds = m_bounds, offset = (0, 0), depth = 0):
+    def _find_safest(bounds = m_bounds, offset = (0, 0), depth = 0, carry = ((0, 0), 0)):
         sector_width = (bounds[1][0] - bounds[0][0])
         sector_height = (bounds[1][1] - bounds[0][1])
 
@@ -138,17 +109,21 @@ def fast_find_safest_position(current_position, direction, board):
             int(offset[1] + floor(sector_height / 2))
         )
 
-        if depth == max_depth or (sector_height * sector_width <= 1): return center_point
+        if depth == max_depth or (sector_height * sector_width <= 1): return carry
         else:
             surrounding_ratings = [
-                ((cell[0], cell[1]), _rate_cell((cell[0], cell[1]), board))
+                ((cell[0], cell[1]), _rate_cell((cell[0], cell[1]), board, 0))
                 for cell in surrounding(center_point)
             ]
 
             # randomize to remove bias towards last in surrounding list
             random.shuffle(surrounding_ratings)
+            go_torwards, rating = reduce(lambda m_carry, cell: cell if cell[1] > m_carry[1] else m_carry, surrounding_ratings)
 
-            go_torwards, rating = reduce(lambda carry, cell: cell if cell[1] > carry[1] else carry, surrounding_ratings)
+            # good rating, just return
+            # if rating > 7: return go_torwards
+
+            if (rating > carry[1]): carry = (go_torwards, rating)
             direction_vector = sub(go_torwards, center_point)
 
             # diagnal
@@ -170,7 +145,7 @@ def fast_find_safest_position(current_position, direction, board):
                 offset = (center_point[0], offset[1])
                 new_bounds = [offset, (bounds[0][0], bounds[1][1])]
 
-            return _find_safest(new_bounds, offset, depth + 1)
+            return _find_safest(new_bounds, offset, depth + 1, carry = carry)
 
     # set up initial bounds
     if direction == "up":
