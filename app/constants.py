@@ -1,6 +1,8 @@
 REDSNAKE = 2
 ADVSNAKE = 3
 
+PING = 50
+
 SNAKE_NAME = 'Rdbrck-Python'
 
 UP = "up"
