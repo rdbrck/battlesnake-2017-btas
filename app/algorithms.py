@@ -4,6 +4,7 @@ import time
 
 from collections import deque
 from utils import neighbours, dist
+from copy import copy, deepcopy
 
 def flood_fill(vacant_func, start_pos, allow_start_in_occupied_cell=False):
     """ Flood fill is an algorithm that expands from a starting position into adjacent
@@ -79,7 +80,7 @@ def astar(vacant_func, start_pos, goal_pos, allow_start_in_occupied_cell=False):
     return None
 
 # todo fix me so I don't actually use the board
-def bfs(x, y, board):
+def bfs(currPos, targetPos, board):
     """ BFS implementation to search for path to food
 
         :param x: starting x coordinate
@@ -95,23 +96,27 @@ def bfs(x, y, board):
 
         return path
 
-    board[x][y] = 0
+    x = currPos[0];
+    y = currPos[1];
+    boardCopy = deepcopy(board);
+    boardCopy.set_cell((x, y), 0)
     queue = deque([(x, y, None)])
 
     while len(queue) > 0:
         node = queue.popleft()
         x = node[0]
         y = node[1]
+        if boardCopy.inside((x, y)):
+            if (x,y) == targetPos: # If we reach food
+                return get_path_from_nodes(node) # Rebuild path
 
-        if board[x][y] == 2: # If we reach food
-            return get_path_from_nodes(node) # Rebuild path
+            if not boardCopy.vacant((x, y)): # Snakes
+                continue
 
-        if (board[x][y] != 0):
-            continue
+            boardCopy.set_cell((x, y), -1) # Mark as explored
 
-        board[x][y]= -1 # Mark as explored
-        for i in neighbours(node):
-            queue.append((i[0], i[1] ,node))
+            for i in neighbours(node):
+                queue.append((i[0], i[1] ,node))
 
     return []
 
