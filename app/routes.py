@@ -35,8 +35,10 @@ def move():
         arenaarray [iterator[1]][iterator[0]] = 1
 
     SnakeList = data["snakes"]
+    print SnakeList
+
     for iterator2 in SnakeList:
-        if iterator2["name"] == "basesnake":
+        if iterator2["name"] == "Rdbrck-Python":
             RedSnakeData = iterator2
             for square in iterator2["coords"]:
                 arenaarray[square[1]][square[0]] = 2
@@ -77,7 +79,7 @@ def move():
                     north_threat += 100 / (abs(width_iterator - RedSnakeX) + abs(height_iterator - RedSnakeY))
                 if RedSnakeData ["health_points"] < 70:
                     if arenaarray[height_iterator][width_iterator] == 1:
-                        north_threat -= 1000 / (abs(width_iterator - RedSnakeX) + abs(height_iterator - RedSnakeY))
+                        north_threat -= (100000 / RedSnakeData ["health_points"]) / (abs(width_iterator - RedSnakeX) + abs(height_iterator - RedSnakeY))
                 width_iterator += 1
             height_iterator += 1
 
@@ -106,7 +108,7 @@ def move():
                     east_threat += 100 / (abs(width_iterator - RedSnakeX) + abs(height_iterator - RedSnakeY))
                 if RedSnakeData ["health_points"] < 70:
                     if arenaarray[height_iterator][width_iterator] == 1:
-                        east_threat -= 1000 / (abs(width_iterator - RedSnakeX) + abs(height_iterator - RedSnakeY))
+                        east_threat -= (100000 / RedSnakeData ["health_points"]) / (abs(width_iterator - RedSnakeX) + abs(height_iterator - RedSnakeY))
                 height_iterator += 1
             width_iterator += 1
 
@@ -135,7 +137,7 @@ def move():
                     west_threat += 100 / (abs(width_iterator - RedSnakeX) + abs(height_iterator - RedSnakeY))
                 if RedSnakeData ["health_points"] < 70:
                     if arenaarray[height_iterator][width_iterator] == 1:
-                        west_threat -= 1000 / (abs(width_iterator - RedSnakeX) + abs(height_iterator - RedSnakeY))
+                        west_threat -= (100000 / RedSnakeData ["health_points"]) / (abs(width_iterator - RedSnakeX) + abs(height_iterator - RedSnakeY))
                 height_iterator += 1
             width_iterator += 1
 
@@ -164,7 +166,7 @@ def move():
                     south_threat += 100 / (abs(width_iterator - RedSnakeX) + abs(height_iterator - RedSnakeY))
                 if RedSnakeData ["health_points"] < 70:
                     if arenaarray[height_iterator][width_iterator] == 1:
-                        south_threat -= 1000 / (abs(width_iterator - RedSnakeX) + abs(height_iterator - RedSnakeY))
+                        south_threat -= (100000 / RedSnakeData ["health_points"]) / (abs(width_iterator - RedSnakeX) + abs(height_iterator - RedSnakeY))
                 width_iterator += 1
             height_iterator += 1
 
