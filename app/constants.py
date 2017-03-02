@@ -14,3 +14,6 @@ TAUNTS = [
     'aoiFnaognioangag',
     '!!!!!!!!!!!!!!!!!!'
 ]
+
+DIR_NAMES = ['up', 'right', 'left', 'down']
+DIR_VECTORS = [(0, -1), (1, 0), (0, 1), (-1, 0)]

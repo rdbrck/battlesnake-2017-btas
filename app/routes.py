@@ -1,10 +1,15 @@
 from constants import TAUNTS
+from entities import Snake, Board
 
 import random
 import bottle
 
 
-global RedSnakeData
+global RedSnake
+global GameBoard
+
+
+SNAKE_NAME = 'Rdbrck-Python'
 
 
 @bottle.route('/static/<path:path>')
@@ -17,8 +22,8 @@ def static(path):
 def start():
     return {
         'color': '#BADA55',
-        'taunt': TAUNTS[random.randint(0, len(TAUNTS)-1)],
-        'name': 'Rdbrck-Python',
+        'taunt': random.choice(TAUNTS),
+        'name': SNAKE_NAME,
         'head_url': ('http://%s/static/head.png' % bottle.request.get_header('host'))
     }
 
@@ -30,26 +35,16 @@ def move():
     #
     # GATHER REQUEST DATA
     #
-    arenaarray = [[0 for x in range(data["width"])] for y in range(data["height"])]
-    for iterator in data["food"]:
-        arenaarray [iterator[1]][iterator[0]] = 1
 
-    SnakeList = data["snakes"]
-    for iterator2 in SnakeList:
-        if iterator2["name"] == "basesnake":
-            RedSnakeData = iterator2
-            for square in iterator2["coords"]:
-                arenaarray[square[1]][square[0]] = 2
-        else:
-            for square in iterator2["coords"]:
-                arenaarray[square[1]][square[0]] = 3
+    GameBoard = Board(**data)
+    RedSnake = GameBoard.get_snake(data['you'])
+    print GameBoard.format()
 
-
-    RedSnakeX = RedSnakeData["coords"][0][0]
-    RedSnakeY = RedSnakeData["coords"][0][1]
-    arenaWidth = data["width"]
-    arenaHeight = data["height"]
-
+    RedSnakeX = list(RedSnake.head)[0]
+    RedSnakeY = list(RedSnake.head)[1]
+    arenaarray = GameBoard.cells
+    arenaWidth = GameBoard.width
+    arenaHeight = GameBoard.height
 
     #
     # GATHER SECONDARY INFORMATION
@@ -208,5 +203,5 @@ def move():
 
     return {
         'move': move,
-        'taunt': TAUNTS[random.randint(0, len(TAUNTS)-1)]
+        'taunt': random.choice(TAUNTS)
     }
