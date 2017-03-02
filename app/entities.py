@@ -1,5 +1,5 @@
 from utils import sub, add
-
+from constants import DIR_VECTORS, EMPTY, FOOD, SNAKE
 
 class Snake(object):
     ATTRIBUTES = ('id', 'health_points')
@@ -30,6 +30,9 @@ class Snake(object):
         return self.coords[-1]
     tail = property(_get_tail)
 
+    def potential_positions(self):
+        return [add(self.head, d) for d in DIR_VECTORS if d != sub((0, 0), self.direction)]
+
 
 class Board(object):
     """
@@ -55,8 +58,10 @@ class Board(object):
             self.width = kwargs['width']
             self.height = kwargs['height']
             self.cells = []
+            self.meta_cells = []
             for x in range(self.width):
-                self.cells.append([0] * self.height)
+                self.cells.append([EMPTY] * self.height)
+                self.meta_cells.append([None] * self.height)
             # Only take snakes that are alive
             self.snakes = [Snake(**s) for s in kwargs['snakes']]
             self.food = list(map(tuple, kwargs['food']))
@@ -64,10 +69,10 @@ class Board(object):
             # Fill out initially occupied cells on board
             for snake in self.snakes:
                 for pos in snake.coords:
-                    self.set_cell(pos, 1)
+                    self.set_cell(pos, SNAKE, snake)
 
             for fud in self.food:
-                self.set_cell(fud, 2)
+                self.set_cell(fud, FOOD)
 
     def get_snake(self, snake_id):
         try:
@@ -75,11 +80,15 @@ class Board(object):
         except StopIteration:
             return None
 
-    def set_cell(self, pos, value):
+    def set_cell(self, pos, value, meta = None):
         self.cells[pos[0]][pos[1]] = value
+        self.meta_cells[pos[0]][pos[1]] = meta
 
     def get_cell(self, pos):
         return self.cells[pos[0]][pos[1]]
+
+    def get_cell_meta(self, pos):
+        return self.meta_cells[pos[0]][pos[1]]
 
     def outside(self, pos):
         return pos[0] < 0 or pos[0] >= self.width or pos[1] < 0 or pos[1] >= self.height
@@ -111,4 +120,4 @@ class Board(object):
         bar = '-' * (len(self.cells) * len(v) + 2) + '\n'
         s.insert(0, bar)
         s.append(bar)
-        return ''.join(s)
+        return ' '.join(s)

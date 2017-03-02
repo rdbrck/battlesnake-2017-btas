@@ -3,7 +3,11 @@ import heapq
 import time
 
 from collections import deque
-from utils import neighbours, dist
+
+from utils import neighbours, surrounding, dist, mul, timing
+from constants import DIR_NAMES, DIR_VECTORS, FOOD, EMPTY, SNAKE
+
+from copy import copy, deepcopy
 
 def flood_fill(vacant_func, start_pos, allow_start_in_occupied_cell=False):
     """ Flood fill is an algorithm that expands from a starting position into adjacent
@@ -78,42 +82,86 @@ def astar(vacant_func, start_pos, goal_pos, allow_start_in_occupied_cell=False):
 
     return None
 
+def find_safe_position(current_position, direction, board):
+    """ find a safe position in the direction :param direction: from
+        :current_position: (usually the position of our snake's head
+
+        :param current_position: current_position -> (x, y) tuple
+        :param direction: direction -> one of ["up", "down", "left", "right"]
+        :param board: board -> the current board"""
+
+    def _print_board(board):
+        for y in range(len(board)):
+            print '|' + ' '.join(["%0.1f" % board[x][y] for x in range(len(board[y]))]) + '|';
+        print # newline
+
+    def _rate_cell(cell):
+        # get surrounding cells
+        cells = map(lambda cell: None if board.outside(cell) else board.get_cell(cell), surrounding(cell))
+        cells = filter(lambda cell: cell is not None, cells) # filter outside board
+        # [0.5, -1, 2] = [EMPTY, SNAKE, FOOD]
+        return reduce(lambda carry, cell: carry + [0.5, -1, 2][cell], cells, 0)
+
+    direction_vector = DIR_VECTORS[DIR_NAMES.index(direction)]
+    opposite_vector = mul(direction_vector, (-1, -1))
+
+    board_ratings = [
+        [
+            _rate_cell((x, y))
+            for y in range(board.height)
+        ] for x in range(board.width)
+    ]
+
+    _print_board(board.cells)
+    _print_board(board_ratings)
+
+    #for x in range(board.width):
+    #    for y in range(board.height):
+    #        cell = board.get_cell((x, y))
+
+    return (0, 0)
+
 # todo fix me so I don't actually use the board
-def bfs(x, y, board):
+# Example: bfs((0,0), (2,2), board) will return [(0,0), (0,1), (0,2), (1,2), (2,2)]
+def bfs(starting_position, target_position, board):
     """ BFS implementation to search for path to food
 
-        :param x: starting x coordinate
-        :param y: starting y coordinate
+        :param starting_position: starting position
+        :param target_position: target position
         :param board: the board state
     """
 
     def get_path_from_nodes(node):
         path = []
         while(node != None):
-            path.append((node[0], node[1]))
+            path.insert(0, (node[0], node[1])) # Reverse
             node = node[2]
 
-        return path
+        return path[1:]
 
-    board[x][y] = 0
+    x = starting_position[0]
+    y = starting_position[1]
+    board_copy = deepcopy(board)
+    board_copy.set_cell((x, y), 0)
     queue = deque([(x, y, None)])
 
     while len(queue) > 0:
         node = queue.popleft()
         x = node[0]
         y = node[1]
+        if board_copy.inside((x, y)):
+            if (x, y) == target_position: # If we reach target_position
+                return get_path_from_nodes(node) # Rebuild path
 
-        if board[x][y] == 2: # If we reach food
-            return get_path_from_nodes(node) # Rebuild path
+            if not board_copy.vacant((x, y)): # Snakes
+                continue
 
-        if (board[x][y] != 0):
-            continue
+            board_copy.set_cell((x, y), -1) # Mark as explored
 
-        board[x][y]= -1 # Mark as explored
-        for i in neighbours(node):
-            queue.append((i[0], i[1] ,node))
+            for i in neighbours(node):
+                queue.append((i[0], i[1], node))
 
-    return []
+    return None # No path
 
 def _longest_path(vacant_func, current, open_set, current_path, longest_path, deadline):
     if time.time() > deadline:
@@ -160,3 +208,16 @@ def longest_path(vacant_func, start_pos, allow_start_in_occupied_cell=False, max
     found, maximal = _longest_path(vacant_func, start_pos, open_set, current_path, longest_path, time.time() + max_wait_seconds)
 
     return longest_path, maximal
+
+
+if __name__ == "__main__":
+    from entities import Board
+    import json
+
+    with open('move_fixture.json', 'r') as f:
+        data = json.load(f)
+        board = Board(**data)
+        snake = board.get_snake(data['you'])
+
+    with timing("find_safe_position", [200]):
+        print find_safe_position(snake.head, "down", board)

@@ -3,11 +3,12 @@ from contextlib import contextmanager
 from constants import DIR_NAMES, DIR_VECTORS
 
 @contextmanager
-def timing(label):
+def timing(label, time_remaining):
     start_time = time.time()
     yield
     elapsed = time.time() - start_time
     print('{} took {}ms'.format(label, elapsed * 1000))
+    time_remaining[0] = time_remaining[0] - (elapsed * 1000)
 
 def add(a, b):
     return (a[0] + b[0], a[1] + b[1])
@@ -15,9 +16,24 @@ def add(a, b):
 def sub(a, b):
     return (a[0] - b[0], a[1] - b[1])
 
+def mul(a, b):
+    return (a[0] * b[0], a[1] * b[1])
+
 def dist(a, b):
     """ Returns the 'manhattan distance' between a and b """
     return abs(a[0] - b[0]) + abs(a[1] - b[1])
+
+def surrounding(pos):
+    return [
+        (pos[0], pos[1] + 1),
+        (pos[0] + 1, pos[1]),
+        (pos[0] + 1, pos[1] + 1),
+        (pos[0] + 1, pos[1] - 1),
+        (pos[0], pos[1] - 1),
+        (pos[0] - 1, pos[1]),
+        (pos[0] - 1, pos[1] - 1),
+        (pos[0] - 1, pos[1] + 1)
+    ]
 
 def neighbours(pos):
     """ Gets coordinates of neighbour coordinates to a coordinate. """

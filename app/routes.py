@@ -1,10 +1,10 @@
-from constants import TAUNTS, SNAKE_NAME
+from constants import TAUNTS, SNAKE_NAME, PING
 from entities import Snake, Board
 from strategy import general_direction
+from utils import timing
 
 import random
 import bottle
-import operator
 
 
 @bottle.route('/static/<path:path>')
@@ -25,6 +25,16 @@ def start():
 
 @bottle.post('/move')
 def move():
+    # Timing Setup
+    time_remaining = [200]
+    time_remaining[0] = time_remaining[0] - 50
+    #Timing Example
+    # with timing ("testing timing function", time_remaining):
+    #     loop = 0
+    #     while loop < 100000:
+    #         loop = loop + 1
+    # print time_remaining
+
     data = bottle.request.json
 
     GameBoard = Board(**data)
