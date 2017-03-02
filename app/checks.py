@@ -1,3 +1,5 @@
+import constants
+
 def invalidmove_wall(direction, localArena, localSnakeX, localSnakeY, width, height):
         #print 'move_walling at', localSnakeX, localSnakeY
 
