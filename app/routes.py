@@ -3,6 +3,7 @@ from entities import Snake, Board
 
 import random
 import bottle
+import operator
 
 
 global RedSnake
@@ -49,6 +50,14 @@ def move():
     #
     # GATHER SECONDARY INFORMATION
     #
+    general_direction = {
+        "up": 0,
+        "down": 0,
+        "right": 0,
+        "left": 0
+    }
+
+    max(stats.iteritems(), key=operator.itemgetter(1))[0]
 
     # calculate threat north
     height_iterator = 0
