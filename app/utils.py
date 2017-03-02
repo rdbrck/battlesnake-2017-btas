@@ -3,11 +3,12 @@ from contextlib import contextmanager
 from constants import DIR_NAMES, DIR_VECTORS
 
 @contextmanager
-def timing(label):
+def timing(label, time_remaining):
     start_time = time.time()
     yield
     elapsed = time.time() - start_time
     print('{} took {}ms'.format(label, elapsed * 1000))
+    time_remaining[0] = time_remaining[0] - (elapsed * 1000)
 
 def add(a, b):
     return (a[0] + b[0], a[1] + b[1])
