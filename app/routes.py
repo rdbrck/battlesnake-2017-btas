@@ -2,7 +2,7 @@ from constants import TAUNTS, SNAKE_NAME, PING
 from entities import Snake, Board
 from strategy import general_direction
 from utils import timing
-from algorithms import bfs, fast_find_safest_position, find_safe_position
+from algorithms import bfs, fast_find_safest_position
 
 import random
 import bottle
