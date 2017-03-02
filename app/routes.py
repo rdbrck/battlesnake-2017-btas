@@ -1,5 +1,6 @@
-from constants import TAUNTS, SNAKE_NAME
+from constants import TAUNTS, SNAKE_NAME, PING
 from entities import Snake, Board
+from utils import timing
 
 import random
 import bottle
@@ -23,6 +24,22 @@ def start():
 
 @bottle.post('/move')
 def move():
+
+    #Timing Setup
+    time_remaining = [200]
+    time_remaining[0] = time_remaining[0] - 50
+    #End Timing Setup
+
+
+    #Timing Example
+    with timing ("testing timing function", time_remaining):
+        loop = 0
+        while loop < 100000:
+            loop = loop + 1
+
+    print time_remaining
+
+
     data = bottle.request.json
 
     GameBoard = Board(**data)
@@ -35,6 +52,13 @@ def move():
     arenaarray = GameBoard.cells
     arenaWidth = GameBoard.width
     arenaHeight = GameBoard.height
+
+    print arenaWidth
+    print arenaHeight
+
+
+
+
 
     # calculate threat north
     height_iterator = 0
@@ -54,6 +78,8 @@ def move():
         while height_iterator < RedSnakeY:
             width_iterator = 0
             while width_iterator < arenaWidth:
+                print width_iterator
+                print arenaarray[height_iterator][width_iterator]
                 if arenaarray[height_iterator][width_iterator] == 1 and height_iterator != RedSnakeY and width_iterator != RedSnakeX:
                     north_threat += 100 / (abs(width_iterator - RedSnakeX) + abs(height_iterator - RedSnakeY))
                 if RedSnake.attributes["health_points"] < 70:
