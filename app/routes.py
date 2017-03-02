@@ -2,6 +2,7 @@ from constants import TAUNTS, SNAKE_NAME, PING
 from entities import Snake, Board
 from strategy import general_direction
 from utils import timing
+from algorithms import bfs
 
 import random
 import bottle
@@ -39,6 +40,8 @@ def move():
 
         ignore_food = (RedSnake.attributes['health_points'] > 60)
         move = general_direction(GameBoard, RedSnake.head, ignore_food)
+
+    a = bfs((0, 0), (15, 15), GameBoard)
 
     if time_remaining[0] > 145:
         print time_remaining[0]

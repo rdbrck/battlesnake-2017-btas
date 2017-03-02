@@ -223,7 +223,7 @@ def bfs(starting_position, target_position, board):
             if (x, y) == target_position: # If we reach target_position
                 return get_path_from_nodes(node) # Rebuild path
 
-            if not board_copy.vacant((x, y)): # Snakes
+            if not board_copy.vacant((x, y)) or board_copy.get_cell((x, y)) == -1: # Snakes
                 continue
 
             board_copy.set_cell((x, y), -1) # Mark as explored
