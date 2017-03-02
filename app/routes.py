@@ -29,7 +29,7 @@ def move():
     time_remaining = [150]
 
     with timing(time_remaining):
-        data = bottle.request.body
+        data = bottle.request.json
 
     print time_remaining[0]
 
