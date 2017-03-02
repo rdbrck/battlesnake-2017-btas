@@ -1,4 +1,3 @@
-from constants import DIR_VECTORS
 from utils import sub, add
 
 
