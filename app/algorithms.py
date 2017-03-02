@@ -137,7 +137,7 @@ def bfs(currPos, targetPos, board):
             path.insert(0, (node[0], node[1])) # Reverse
             node = node[2]
 
-        return path
+        return path[1:]
 
     x = currPos[0];
     y = currPos[1];
