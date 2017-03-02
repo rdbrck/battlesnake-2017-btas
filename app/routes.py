@@ -3,14 +3,12 @@ from constants import TAUNTS
 import random
 import bottle
 
-
 global RedSnakeData
 
 
 @bottle.route('/static/<path:path>')
 def static(path):
     return bottle.static_file(path, root='static/')
-
 
 @bottle.route('/')
 @bottle.post('/start')
@@ -21,7 +19,6 @@ def start():
         'name': 'Rdbrck-Python',
         'head_url': ('http://%s/static/head.png' % bottle.request.get_header('host'))
     }
-
 
 @bottle.post('/move')
 def move():
