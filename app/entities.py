@@ -53,6 +53,9 @@ class Board(object):
                 self.cells.append(clone.cells[x].copy())
             self.snakes = [Snake(s) for s in clone.snakes]
             self.food = clone.food.copy()
+            #Do we need to clone over food that is marked as 'spoiled'?
+
+
         else:
             # Initialize a board from a battlesnake gamestate dict
             self.width = kwargs['width']
@@ -72,7 +75,38 @@ class Board(object):
                     self.set_cell(pos, SNAKE, snake)
 
             for fud in self.food:
-                self.set_cell(fud, FOOD)
+                if true == raceable_food(fud.pos):
+                    self.set_cell(fud, FOOD)
+                else:
+                    self.set_cell(fud, SPOILED)
+
+
+
+    #Raceable food does a bfs search to see which snake is closest in moves.
+    #returns true if the food is closest to RedSnake
+    #returns false if the food is closest to an AdvSnake
+    #In a Tie, the largest snake wins
+    def raceable_food (self, pos):
+        #Add the first position to the perimeter
+
+        #While there are values in the perimeter
+            #Look at the square
+            #If Run into a snake tail - Don't add any squares from this square
+            #If Run into a snake head - Don't add any squares from any square, but finish perimeter, and add this snake to a list
+
+        #After looking at all perimeter
+            #If No heads encountered, return false
+
+            #If the closest head is RedSnake, return true
+
+            #If closest head is AdvSnake, return false
+
+            #If there are multiple snakes, choose largest one
+                #If largest one is us, return true
+                
+                #Else return false
+
+
 
     def get_snake(self, snake_id):
         try:
