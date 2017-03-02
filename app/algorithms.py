@@ -80,6 +80,7 @@ def astar(vacant_func, start_pos, goal_pos, allow_start_in_occupied_cell=False):
     return None
 
 # todo fix me so I don't actually use the board
+# Example: bfs((0,0), (2,2), board) will return [(0,0), (0,1), (0,2), (1,2), (2,2)]
 def bfs(currPos, targetPos, board):
     """ BFS implementation to search for path to food
 
@@ -91,7 +92,7 @@ def bfs(currPos, targetPos, board):
     def get_path_from_nodes(node):
         path = []
         while(node != None):
-            path.append((node[0], node[1]))
+            path.insert(0, (node[0], node[1])) # Reverse
             node = node[2]
 
         return path
@@ -118,7 +119,7 @@ def bfs(currPos, targetPos, board):
             for i in neighbours(node):
                 queue.append((i[0], i[1] ,node))
 
-    return []
+    return none # No path
 
 def _longest_path(vacant_func, current, open_set, current_path, longest_path, deadline):
     if time.time() > deadline:
