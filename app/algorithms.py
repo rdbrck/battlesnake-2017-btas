@@ -122,7 +122,7 @@ def fast_find_safest_position(current_position, direction, board):
 
             # randomize to remove bias towards last in surrounding list
             random.shuffle(surrounding_ratings)
-            position, rating = reduce(lambda m_carry, cell: cell if cell[1] > m_carry[1] else m_carry, surrounding_ratings, (None, 0))
+            position, rating = reduce(lambda m_carry, cell: cell if cell[1] > m_carry[1] else m_carry, surrounding_ratings, (None, -100000000000))
 
             new_bounds = bounds
             if position is not None:
@@ -170,7 +170,7 @@ def find_food(current_position, health_remaining, board, board_food):
     # rated_food = filter(lambda food: dist(food[0], current_position) < health_remaining, rated_food)
     # return reduce(lambda carry, food: food if not carry[0] or food[1] > carry[1] else carry, rated_food, (None, None))
 
-def bfs(starting_position, target_position, board, return_list):
+def bfs(starting_position, target_position, board, return_list, exclude = []):
     """ BFS implementation to search for path to food
 
         :param starting_position: starting position
@@ -193,12 +193,15 @@ def bfs(starting_position, target_position, board, return_list):
     y = starting_position[1]
     board_copy = deepcopy(board)
     board_copy.set_cell((x, y), 0)
+    # [ board_copy.set_cell((cell[0], cell[1]), -1) for cell in exclude ]
+    # print board_copy.format()
     queue = deque([(x, y, None)])
 
     while len(queue) > 0:
         node = queue.popleft()
         x = node[0]
         y = node[1]
+
         if board_copy.inside((x, y)) == True:
             if (x, y) == target_position: # If we reach target_position
                 return get_path_from_nodes(node) # Rebuild path
