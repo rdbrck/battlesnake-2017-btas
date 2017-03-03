@@ -45,6 +45,7 @@ def general_direction(board, head, ignore_food):
     # food in area
     if not ignore_food:
         for pos in board.food:
+            if board.get_cell(pos) == 3: continue
             #right
             if pos[0] > head[0]:
                 direction['right'] -= 2000 / dist(pos, head)
