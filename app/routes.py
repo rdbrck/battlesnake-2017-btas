@@ -2,7 +2,7 @@ from constants import TAUNTS, SNAKE_NAME, PING
 from entities import Snake, Board
 from strategy import general_direction
 from utils import timing, get_direction
-from algorithms import bfs, fast_find_safest_position
+from algorithms import bfs, fast_find_safest_position, find_food
 
 import random
 import bottle
@@ -39,18 +39,23 @@ def move():
         snake = board.get_snake(data['you'])
         direction = general_direction(board, snake.head, snake.attributes['health_points'])
 
-    with timing("fast_find_safest_position", time_remaining):
-        go_to_position, rating = fast_find_safest_position(snake.head, direction, board)
+    position = None
+    if snake.attributes['health_points'] <= 50:
+        with timing("find_food", time_remaining):
+            food_positions = find_food(snake.head, snake.attributes['health_points'], board)
+            positions = [ position[0] for position in food_positions ]
+            print len(positions), "positions:", positions
 
-    # print go_to_position
-    #print get_direction(snake.head, bfs(snake.head, go_to_position, board)[0])
+    if snake.attributes['health_points'] > 60 or position == None:
+        with timing("fast_find_safest_position", time_remaining):
+            positions = fast_find_safest_position(snake.head, direction, board)
+            positions = [ position[0] for position in positions ]
+            print len(positions), "positions:", positions
 
-    # print bfs(snake.head, go_to_position, board)
-    # if time_remaining[0] > 145:
-        # print time_remaining[0]
-        # TODO: DO BETTER STUFF HERE
+    path = bfs(snake.head, positions[0], board)
+    move = get_direction(snake.head, path[0])
 
     return {
-        'move': get_direction(snake.head, bfs(snake.head, go_to_position, board)[0]),
+        'move': move,
         'taunt': random.choice(TAUNTS)
     }
