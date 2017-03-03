@@ -81,7 +81,8 @@ class Board(object):
     def _contested_food (self, pos, snake_id):
         current_snake = self.snakes[0]
         for snake in self.snakes:
-            if dist(snake.head, pos) < dist(current_snake.head, pos):
+            if ((dist(snake.head, pos) < dist(current_snake.head, pos)) or
+                    ((dist(snake.head, pos) == dist(current_snake.head, pos)) and (len(snake.coords) >= len(current_snake.coords)))):
                 current_snake = snake
 
         return (current_snake.attributes['id'] == snake_id)
