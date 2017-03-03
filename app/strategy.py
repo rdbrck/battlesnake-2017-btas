@@ -15,13 +15,13 @@ def general_direction(board, head, health):
     # close to a border or snake?
     if not board.vacant((head[0]-1,head[1])):
         direction["left"] += 1000000
-    
+
     if not board.vacant((head[0]+1,head[1])):
         direction["right"] += 1000000
 
     if not board.vacant((head[0],head[1]-1)):
         direction["up"] += 1000000
-    
+
     if not board.vacant((head[0],head[1]+1)):
         direction["down"] += 1000000
 
