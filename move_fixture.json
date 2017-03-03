@@ -7,23 +7,23 @@
       "taunt": "git gud",
       "name": "my-snake",
       "id": "25229082-f0d7-4315-8c52-6b0ff23fb1fb",
-      "health_points": 93,
+      "health_points": 14,
       "coords": [
         [
-          0,
-          0
+          10,
+          10
         ],
         [
-          0,
-          1
+          10,
+          11
         ],
         [
-          0,
-          2
+          10,
+          12
         ],
         [
-          0,
-          3
+          10,
+          13
         ]
       ]
     },

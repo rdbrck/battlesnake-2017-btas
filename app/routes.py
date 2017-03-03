@@ -37,9 +37,7 @@ def move():
     with timing("data parsing", time_remaining):
         board = Board(**data)
         snake = board.get_snake(data['you'])
-        ignore_food = (snake.attributes['health_points'] > 60)
-        direction = general_direction(board, snake.head, ignore_food)
-        print snake.head
+        direction = general_direction(board, snake.head, snake.attributes['health_points'])
 
     with timing("fast_find_safest_position", time_remaining):
         go_to_position, rating = fast_find_safest_position(snake.head, direction, board)
