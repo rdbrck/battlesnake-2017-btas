@@ -177,12 +177,12 @@ def bfs(starting_position, target_position, board):
         while(node != None):
             path.insert(0, (node[0], node[1])) # Reverse
             node = node[2]
-
         return path[1:]
 
     x = starting_position[0]
     y = starting_position[1]
     board_copy = deepcopy(board)
+
     board_copy.set_cell((x, y), 0)
     queue = deque([(x, y, None)])
 
@@ -190,11 +190,11 @@ def bfs(starting_position, target_position, board):
         node = queue.popleft()
         x = node[0]
         y = node[1]
-        if board_copy.inside((x, y)):
+        if board_copy.inside((x, y)) == True:
             if (x, y) == target_position: # If we reach target_position
                 return get_path_from_nodes(node) # Rebuild path
 
-            if not board_copy.vacant((x, y)) or board_copy.get_cell((x, y)) == -1: # Snakes
+            if board_copy.outside((x, y)) == True or board_copy.get_cell((x, y)) == -1 or board_copy.get_cell((x, y)) == 1: # Snakes
                 continue
 
             board_copy.set_cell((x, y), -1) # Mark as explored
