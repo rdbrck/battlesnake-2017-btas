@@ -43,9 +43,9 @@ def general_direction(board, head, health):
                 direction['down'] += 1000 / dist(pos, head)
 
     # food in area
-    if health < 60:
+    if health < 80:
         for pos in board.food:
-            if board.get_cell(pos) == 3 and (health - dist(pos, head) > 15): continue
+            if board.get_cell(pos) == 3 and (health - dist(pos, head) > 20): continue
             #right
             if pos[0] > head[0]:
                 direction['right'] -= (10000 / ((health / 10) + 1)) / dist(pos, head)
@@ -60,3 +60,30 @@ def general_direction(board, head, health):
                 direction['down'] -= (10000 / ((health / 10) + 1)) / dist(pos, head)
 
     return min(direction.iterkeys(), key=(lambda key: direction[key]))
+
+
+def need_food(board, head, health):
+    food_to_get = []
+
+    # if we really need food go for it even if it's not 'safe'
+    if health < 25:
+        for food in board.food:
+            if (health + dist(head, food)) < 25:
+                food_to_get.append(food)
+
+    if len(food_to_get) > 0:
+        return food_to_get
+
+    # food that is considered 'safe'
+    safe_food = [fud for fud in board.food if board.get_cell(fud) != 3]    
+
+    # always go for safe food even if we kind of need it
+    for food in safe_food:
+        # get food if it's close
+        if dist(food, snake.head) <= 2 and health < 80:
+            food_to_get.append(food)
+        # get food if we kind of need it
+        elif health < 60:
+            food_to_get.append(food)
+
+    return (food_to_get if len(food_to_get) > 0 else None)

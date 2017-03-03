@@ -160,8 +160,7 @@ def fast_find_safest_position(current_position, direction, board):
     return _find_safest(bounds, bounds[0])
 
 
-def find_food(current_position, health_remaining, board):
-    board_food = board.food
+def find_food(current_position, health_remaining, board, board_food):
     rated_food = map(lambda food: (food, _rate_cell(food, board, 0)), board_food)
 
     return sorted(rated_food, lambda food_1, food_2: food_1[1] > food_2[1])
