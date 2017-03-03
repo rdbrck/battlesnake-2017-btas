@@ -10,6 +10,7 @@ from threading import Thread, Lock
 import random
 import bottle
 import json
+import os
 
 _db_lock = Lock()
 
@@ -21,11 +22,30 @@ def static(path):
 @bottle.route('/')
 @bottle.post('/start')
 def start():
+    # port = bottle.request.get_header('port')
+    port = os.getenv('PORT', '8080')
+
+    port_colors = {
+        '8080': '#f00000',
+        '8081': '#ff0000',
+        '8082': '#fff000',
+        '8083': '#ffff00',
+        '8084': '#fffff0',
+        '8085': '#ffffff',
+        '8086': '#f0f0f0',
+        '8087': '#0f0f0f'
+    }
+
+    try:
+        color = port_colors[str(port)]
+    except:
+        color = "#123456"
+
     return {
-        'color': '#BADA55',
+        'color': color,
         'taunt': random.choice(TAUNTS),
-        'name': SNAKE_NAME,
         'head_url': ('http://%s/static/uneil.gif' % bottle.request.get_header('host')),
+        'name': color,
         'head_type': 'safe',
         'tail_type': 'freckled'
     }
@@ -56,6 +76,8 @@ def move():
         with timing("find_food", time_remaining):
             food_positions = find_food(snake.head, snake.attributes['health_points'], board, food)
             positions = [ position[0] for position in food_positions ]
+            print positions
+            print [ board.get_cell(position) for position in positions ]
 
             for i in range(len(positions)):
                 t = Thread(target=bfs(snake.head, positions[i], board, next_move))
@@ -72,6 +94,8 @@ def move():
         with timing("fast_find_safest_position", time_remaining):
             positions = fast_find_safest_position(snake.head, direction, board)
             positions = [ position[0] for position in positions ]
+            print positions
+            print [ board.get_cell(position) for position in positions ]
 
             for i in range(len(positions)):
                 t = Thread(target=bfs(snake.head, positions[i], board, next_move))
@@ -84,6 +108,7 @@ def move():
             path = max(next_move, key=len)
             move = get_direction(snake.head, path[0])
 
+    print "moving", move
     return {
         'move': move,
         'taunt': random.choice(TAUNTS)
