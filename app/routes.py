@@ -42,10 +42,10 @@ def start():
         color = "#123456"
 
     return {
-        'color': color,
+        'color': '#ff0000',
         'taunt': random.choice(TAUNTS),
         'head_url': ('http://%s/static/uneil.gif' % bottle.request.get_header('host')),
-        'name': color,
+        'name': 'BETTER THAN ALEKSIY\'S SNAKE',
         'head_type': 'safe',
         'tail_type': 'freckled'
     }
