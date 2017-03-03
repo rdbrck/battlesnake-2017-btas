@@ -21,7 +21,9 @@ def start():
         'color': '#BADA55',
         'taunt': random.choice(TAUNTS),
         'name': SNAKE_NAME,
-        'head_url': ('http://%s/static/head.png' % bottle.request.get_header('host'))
+        'head_url': ('http://%s/static/head.png' % bottle.request.get_header('host')),
+        'head_type': 'safe',
+        'tail_type': 'freckled'
     }
 
 
