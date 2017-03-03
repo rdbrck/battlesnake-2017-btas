@@ -89,7 +89,7 @@ def _rate_cell(cell, board, depth = 0):
     cells = map(lambda cell: (cell, board.get_cell(cell)), cells)
     cell_value = reduce(lambda carry, cell: carry + [0.5, -1, 2][cell[1]], cells, 0)
 
-    if depth >= 2: return cell_value
+    if depth >= 2 or cell_value < 2: return cell_value
     else: return cell_value + sum([
         _rate_cell(m_cell, board, depth + 1) / 10
         for m_cell in surrounding(cell)
@@ -177,12 +177,12 @@ def bfs(starting_position, target_position, board):
         while(node != None):
             path.insert(0, (node[0], node[1])) # Reverse
             node = node[2]
-
         return path[1:]
 
     x = starting_position[0]
     y = starting_position[1]
     board_copy = deepcopy(board)
+
     board_copy.set_cell((x, y), 0)
     queue = deque([(x, y, None)])
 
@@ -190,11 +190,11 @@ def bfs(starting_position, target_position, board):
         node = queue.popleft()
         x = node[0]
         y = node[1]
-        if board_copy.inside((x, y)):
+        if board_copy.inside((x, y)) == True:
             if (x, y) == target_position: # If we reach target_position
                 return get_path_from_nodes(node) # Rebuild path
 
-            if not board_copy.vacant((x, y)) or board_copy.get_cell((x, y)) == -1: # Snakes
+            if board_copy.outside((x, y)) == True or board_copy.get_cell((x, y)) == -1 or board_copy.get_cell((x, y)) == 1: # Snakes
                 continue
 
             board_copy.set_cell((x, y), -1) # Mark as explored
