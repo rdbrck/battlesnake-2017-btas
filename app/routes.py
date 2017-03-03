@@ -44,8 +44,8 @@ def start():
     return {
         'color': color,
         'taunt': random.choice(TAUNTS),
+        'head_url': ('http://%s/static/uneil.gif' % bottle.request.get_header('host')),
         'name': color,
-        'head_url': ('http://%s/static/head.png' % bottle.request.get_header('host')),
         'head_type': 'safe',
         'tail_type': 'freckled'
     }
