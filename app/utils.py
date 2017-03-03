@@ -49,3 +49,17 @@ def neighbours(pos):
 def translate_to_direction(new_pos, old_pos):
     """ Translates the change between two positions into a direction name. """
     return DIR_NAMES[DIR_VECTORS.index(sub(new_pos, old_pos))]
+
+def get_direction(currPos, nextPos):
+
+    if (currPos[0] == nextPos[0]):
+        if(nextPos[1] - currPos[1] < 0):
+            return 'up'
+        else:
+            return 'down'
+    elif(currPos[1] == nextPos[1]):
+        if(nextPos[0] - currPos[0] < 0):
+            return 'left'
+        else:
+            return 'right'
+
