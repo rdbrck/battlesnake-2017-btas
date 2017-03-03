@@ -87,7 +87,7 @@ def astar(vacant_func, start_pos, goal_pos, allow_start_in_occupied_cell=False):
 def _rate_cell(cell, board, depth = 0):
     cells = filter(lambda m_cell: board.inside(m_cell), surrounding(cell))
     cells = map(lambda m_cell: (m_cell, board.get_cell(m_cell)), cells)
-    cell_value = reduce(lambda carry, m_cell: carry + [0.5, -1, 2, 0][m_cell[1]], cells, 0)
+    cell_value = reduce(lambda carry, m_cell: carry + [0.5, -5, 2, 0][m_cell[1]], cells, 0)
 
     if depth >= 2 or cell_value < 2: return cell_value
     else: return cell_value + sum([
@@ -117,7 +117,7 @@ def fast_find_safest_position(current_position, direction, board):
             surrounding_ratings = [
                 ((cell[0], cell[1]), _rate_cell((cell[0], cell[1]), board, 0))
                 for cell in surrounding(center_point)
-                if cell not in carry_cells and board.inside(cell)
+                if cell not in carry_cells and board.inside(cell) and board.get_cell(cell) != SNAKE
             ]
 
             # randomize to remove bias towards last in surrounding list

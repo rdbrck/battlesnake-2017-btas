@@ -90,8 +90,8 @@ def move():
             food_positions = find_food(snake.head, snake.attributes['health_points'], board, food)
             positions = [ position[0] for position in food_positions ]
             # positions = list(set([ position[0] for position in food_positions ]) - set(potential_snake_positions))
-            #print positions
-            #print [ board.get_cell(position) for position in positions ]
+            print positions
+            print [ board.get_cell(position) for position in positions ]
 
             for i in range(len(positions)):
                 t = Thread(target=bfs(snake.head, positions[i], board, next_move))
@@ -113,8 +113,8 @@ def move():
             positions = fast_find_safest_position(snake.head, direction, board)
             positions = [ position[0] for position in positions ]
             # positions = list(set([position[0] for position in positions]) - set(potential_snake_positions))
-            #print positions
-            #print [ board.get_cell(position) for position in positions ]
+            print positions
+            print [ board.get_cell(position) for position in positions ]
 
             for i in range(len(positions)):
                 t = Thread(target=bfs(snake.head, positions[i], board, next_move, exclude = potential_snake_positions))
