@@ -15,13 +15,13 @@ def general_direction(board, head, health):
     # close to a border or snake?
     if not board.vacant((head[0]-1,head[1])):
         direction["left"] += 1000000
-    
+
     if not board.vacant((head[0]+1,head[1])):
         direction["right"] += 1000000
 
     if not board.vacant((head[0],head[1]-1)):
         direction["up"] += 1000000
-    
+
     if not board.vacant((head[0],head[1]+1)):
         direction["down"] += 1000000
 
@@ -76,12 +76,12 @@ def need_food(board, head, health):
         return food_to_get
 
     # food that is considered 'safe'
-    safe_food = [fud for fud in board.food if board.get_cell(fud) != 3]    
+    safe_food = [fud for fud in board.food if board.get_cell(fud) != 3]
 
     # always go for safe food even if we kind of need it
     for food in safe_food:
         # get food if it's close
-        if dist(food, snake.head) <= 2 and health < ((num_snakes * 7) + 15):
+        if dist(food, head) <= 2 and health < ((num_snakes * 7) + 15):
             food_to_get.append(food)
         # get food if we kind of need it
         elif health < 50:
