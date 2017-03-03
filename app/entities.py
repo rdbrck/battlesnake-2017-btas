@@ -1,5 +1,5 @@
-from utils import sub, add
-from constants import DIR_VECTORS, EMPTY, FOOD, SNAKE
+from utils import sub, add, dist
+from constants import DIR_VECTORS, EMPTY, FOOD, SNAKE, SPOILED
 
 class Snake(object):
     ATTRIBUTES = ('id', 'health_points')
@@ -53,9 +53,6 @@ class Board(object):
                 self.cells.append(clone.cells[x].copy())
             self.snakes = [Snake(s) for s in clone.snakes]
             self.food = clone.food.copy()
-            #Do we need to clone over food that is marked as 'spoiled'?
-
-
         else:
             # Initialize a board from a battlesnake gamestate dict
             self.width = kwargs['width']
@@ -72,41 +69,22 @@ class Board(object):
             # Fill out initially occupied cells on board
             for snake in self.snakes:
                 for pos in snake.coords:
-                    self.set_cell(pos, SNAKE, snake)
+                    self.set_cell(pos, SNAKE)
 
             for fud in self.food:
-                if true == raceable_food(fud.pos):
+                if self._contested_food(fud, kwargs['you']):
                     self.set_cell(fud, FOOD)
                 else:
                     self.set_cell(fud, SPOILED)
 
 
+    def _contested_food (self, pos, snake_id):
+        current_snake = self.snakes[0]
+        for snake in self.snakes:
+            if dist(snake.head, pos) < dist(current_snake.head, pos):
+                current_snake = snake
 
-    #Raceable food does a bfs search to see which snake is closest in moves.
-    #returns true if the food is closest to RedSnake
-    #returns false if the food is closest to an AdvSnake
-    #In a Tie, the largest snake wins
-    def raceable_food (self, pos):
-        #Add the first position to the perimeter
-
-        #While there are values in the perimeter
-            #Look at the square
-            #If Run into a snake tail - Don't add any squares from this square
-            #If Run into a snake head - Don't add any squares from any square, but finish perimeter, and add this snake to a list
-
-        #After looking at all perimeter
-            #If No heads encountered, return false
-
-            #If the closest head is RedSnake, return true
-
-            #If closest head is AdvSnake, return false
-
-            #If there are multiple snakes, choose largest one
-                #If largest one is us, return true
-                
-                #Else return false
-
-
+        return (current_snake.attributes['id'] == snake_id)
 
     def get_snake(self, snake_id):
         try:
@@ -132,13 +110,13 @@ class Board(object):
 
     def vacant(self, pos):
         # Inlined for performance:
-        return not (pos[0] < 0 or pos[0] >= self.width or pos[1] < 0 or pos[1] >= self.height) and self.cells[pos[0]][pos[1]] != 1
+        return not (pos[0] < 0 or pos[0] >= self.width or pos[1] < 0 or pos[1] >= self.height) and self.cells[pos[0]][pos[1]] != SNAKE
 
     def has_snake(self, pos):
-        return (self.cells[pos[0]][pos[1]] == 1)
+        return (self.cells[pos[0]][pos[1]] == SNAKE)
 
     def has_food(self, pos):
-        return (self.cells[pos[0]][pos[1]] == 2)
+        return (self.cells[pos[0]][pos[1]] == FOOD or self.cells[pos[0]][pos[1]] == SPOILED)
 
     def __str__(self):
         return self.format(lambda v: ' ' if v == 0 else '{:d}'.format(v))
