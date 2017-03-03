@@ -89,7 +89,7 @@ def _rate_cell(cell, board, depth = 0):
     cells = map(lambda cell: (cell, board.get_cell(cell)), cells)
     cell_value = reduce(lambda carry, cell: carry + [0.5, -1, 2][cell[1]], cells, 0)
 
-    if depth >= 2: return cell_value
+    if depth >= 2 or cell_value < 2: return cell_value
     else: return cell_value + sum([
         _rate_cell(m_cell, board, depth + 1) / 10
         for m_cell in surrounding(cell)

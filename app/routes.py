@@ -40,10 +40,7 @@ def move():
         direction = general_direction(board, snake.head, ignore_food)
 
     with timing("fast_find_safest_position", time_remaining):
-        # find_safe_position(snake.head, direction, board) # show the boards
         go_to_position, rating = fast_find_safest_position(snake.head, direction, board)
-        print go_to_position, rating
-        print board.get_cell(go_to_position)
 
     # if time_remaining[0] > 145:
         # print time_remaining[0]
