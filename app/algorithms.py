@@ -85,9 +85,9 @@ def astar(vacant_func, start_pos, goal_pos, allow_start_in_occupied_cell=False):
     return None
 
 def _rate_cell(cell, board, depth = 0):
-    cells = filter(lambda cell: board.inside(cell), surrounding(cell))
-    cells = map(lambda cell: (cell, board.get_cell(cell)), cells)
-    cell_value = reduce(lambda carry, cell: carry + [0.5, -1, 2][cell[1]], cells, 0)
+    cells = filter(lambda m_cell: board.inside(m_cell), surrounding(cell))
+    cells = map(lambda m_cell: (m_cell, board.get_cell(m_cell)), cells)
+    cell_value = reduce(lambda carry, m_cell: carry + [0.5, -1, 2, 0][m_cell[1]], cells, 0)
 
     if depth >= 2 or cell_value < 2: return cell_value
     else: return cell_value + sum([
@@ -100,7 +100,7 @@ def fast_find_safest_position(current_position, direction, board):
     m_bounds = [(0, 0), (board.width, board.height)]
     max_depth = 10
 
-    def _find_safest(bounds = m_bounds, offset = (0, 0), depth = 0, carry = ((0, 0), 0)):
+    def _find_safest(bounds = m_bounds, offset = (0, 0), depth = 0, carry = []):
         sector_width = (bounds[1][0] - bounds[0][0])
         sector_height = (bounds[1][1] - bounds[0][1])
 
@@ -109,22 +109,22 @@ def fast_find_safest_position(current_position, direction, board):
             int(offset[1] + floor(sector_height / 2))
         )
 
-        if depth == max_depth or (sector_height * sector_width <= 1): return carry
+        if depth == max_depth or (sector_height * sector_width <= 1):
+            return sorted(carry, lambda cell_1, cell_2: cell_1[1] < cell_2[1])[:3]
         else:
+            # filter cells that we've already rated
+            carry_cells = [ cell[0] for cell in carry ]
             surrounding_ratings = [
                 ((cell[0], cell[1]), _rate_cell((cell[0], cell[1]), board, 0))
-                for cell in surrounding(center_point)
+                for cell in surrounding(center_point) if cell not in carry_cells
             ]
 
             # randomize to remove bias towards last in surrounding list
             random.shuffle(surrounding_ratings)
-            go_torwards, rating = reduce(lambda m_carry, cell: cell if cell[1] > m_carry[1] else m_carry, surrounding_ratings)
+            position, rating = reduce(lambda m_carry, cell: cell if cell[1] > m_carry[1] else m_carry, surrounding_ratings)
 
-            # good rating, just return
-            # if rating > 7: return go_torwards
-
-            if (rating > carry[1]): carry = (go_torwards, rating)
-            direction_vector = sub(go_torwards, center_point)
+            carry = carry + [(position, rating)]
+            direction_vector = sub(position, center_point)
 
             # diagnal
             if abs(direction_vector[0]) == abs(direction_vector[1]):
@@ -159,6 +159,14 @@ def fast_find_safest_position(current_position, direction, board):
 
     return _find_safest(bounds, bounds[0])
 
+
+def find_food(current_position, health_remaining, board):
+    board_food = board.food
+    rated_food = map(lambda food: (food, _rate_cell(food, board, 0)), board_food)
+
+    return sorted(rated_food, lambda food_1, food_2: food_1[1] > food_2[1])
+    # rated_food = filter(lambda food: dist(food[0], current_position) < health_remaining, rated_food)
+    # return reduce(lambda carry, food: food if not carry[0] or food[1] > carry[1] else carry, rated_food, (None, None))
 
 def bfs(starting_position, target_position, board):
     """ BFS implementation to search for path to food
