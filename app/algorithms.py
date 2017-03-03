@@ -92,7 +92,7 @@ def _rate_cell(cell, board, depth = 0):
     if depth >= 2 or cell_value < 2: return cell_value
     else: return cell_value + sum([
         _rate_cell(m_cell, board, depth + 1) / 10
-        for m_cell in surrounding(cell)
+        for m_cell in surrounding(cell) if board.inside(m_cell)
     ])
 
 def fast_find_safest_position(current_position, direction, board):
@@ -116,7 +116,8 @@ def fast_find_safest_position(current_position, direction, board):
             carry_cells = [ cell[0] for cell in carry ]
             surrounding_ratings = [
                 ((cell[0], cell[1]), _rate_cell((cell[0], cell[1]), board, 0))
-                for cell in surrounding(center_point) if cell not in carry_cells
+                for cell in surrounding(center_point)
+                if cell not in carry_cells and board.inside(cell)
             ]
 
             # randomize to remove bias towards last in surrounding list

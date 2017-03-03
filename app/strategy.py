@@ -80,7 +80,7 @@ def need_food(board, head, health):
     # always go for safe food even if we kind of need it
     for food in safe_food:
         # get food if it's close
-        if dist(food, head) <= 2 and health < 80:
+        if dist(food, head) <= 2 and health < 75: # try 80 four 12 snakes
             food_to_get.append(food)
         # get food if we kind of need it
         elif health < 60:
