@@ -48,15 +48,15 @@ def general_direction(board, head, health):
             if board.get_cell(pos) == 3 and (health - dist(pos, head) > 15): continue
             #right
             if pos[0] > head[0]:
-                direction['right'] -= (10000 / (health / 10)) / dist(pos, head)
+                direction['right'] -= (10000 / ((health / 10)) + 1) / dist(pos, head)
             #left
             elif pos[0] < head[0]:
-                direction['left'] -= (10000 / (health / 10)) / dist(pos, head)
+                direction['left'] -= (10000 / ((health / 10)) + 1) / dist(pos, head)
             #up
             if pos[1] < head[1]:
-                direction['up'] -= (10000 / (health / 10)) / dist(pos, head)
+                direction['up'] -= (10000 / ((health / 10)) + 1) / dist(pos, head)
             #down
             elif pos[1] > head[1]:
-                direction['down'] -= (10000 / (health / 10)) / dist(pos, head)
+                direction['down'] -= (10000 / ((health / 10)) + 1) / dist(pos, head)
 
     return min(direction.iterkeys(), key=(lambda key: direction[key]))
