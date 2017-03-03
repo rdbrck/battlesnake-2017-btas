@@ -122,29 +122,31 @@ def fast_find_safest_position(current_position, direction, board):
 
             # randomize to remove bias towards last in surrounding list
             random.shuffle(surrounding_ratings)
-            position, rating = reduce(lambda m_carry, cell: cell if cell[1] > m_carry[1] else m_carry, surrounding_ratings)
+            position, rating = reduce(lambda m_carry, cell: cell if cell[1] > m_carry[1] else m_carry, surrounding_ratings, (None, 0))
 
-            carry = carry + [(position, rating)]
-            direction_vector = sub(position, center_point)
+            new_bounds = bounds
+            if position is not None:
+                carry = carry + [(position, rating)]
+                direction_vector = sub(position, center_point)
 
-            # diagnal
-            if abs(direction_vector[0]) == abs(direction_vector[1]):
-                direction_vector = list(direction_vector) # tuples are immutable
-                direction_vector[int(time.time()) % 2] = 0 # 300% faster than random.randint()
-                direction_vector = tuple(direction_vector) # back to tuple because DIR_VECTOR contains tuples
+                # diagnal
+                if abs(direction_vector[0]) == abs(direction_vector[1]):
+                    direction_vector = list(direction_vector) # tuples are immutable
+                    direction_vector[int(time.time()) % 2] = 0 # 300% faster than random.randint()
+                    direction_vector = tuple(direction_vector) # back to tuple because DIR_VECTOR contains tuples
 
-            direction = DIR_NAMES[DIR_VECTORS.index(direction_vector)]
+                direction = DIR_NAMES[DIR_VECTORS.index(direction_vector)]
 
-            if direction == "up":
-                new_bounds = [offset, (bounds[1][0], bounds[1][1])]
-            elif direction == "down":
-                offset = (offset[0], center_point[1])
-                new_bounds = [offset, (bounds[1][0], bounds[1][1])]
-            elif direction == "left":
-                new_bounds = [offset, (center_point[0], bounds[1][1])]
-            else: # right
-                offset = (center_point[0], offset[1])
-                new_bounds = [offset, (bounds[0][0], bounds[1][1])]
+                if direction == "up":
+                    new_bounds = [offset, (bounds[1][0], bounds[1][1])]
+                elif direction == "down":
+                    offset = (offset[0], center_point[1])
+                    new_bounds = [offset, (bounds[1][0], bounds[1][1])]
+                elif direction == "left":
+                    new_bounds = [offset, (center_point[0], bounds[1][1])]
+                else: # right
+                    offset = (center_point[0], offset[1])
+                    new_bounds = [offset, (bounds[0][0], bounds[1][1])]
 
             return _find_safest(new_bounds, offset, depth + 1, carry = carry)
 

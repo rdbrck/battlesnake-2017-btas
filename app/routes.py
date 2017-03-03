@@ -72,10 +72,16 @@ def move():
     next_move = list()
     thread_pool = list()
 
+    potential_snake_positions = reduce(
+        lambda carry, m_snake: carry + m_snake.potential_positions() if len(m_snake) > len(snake) else [],
+        board.snakes,
+        []
+    )
+
     if food:
         with timing("find_food", time_remaining):
             food_positions = find_food(snake.head, snake.attributes['health_points'], board, food)
-            positions = [ position[0] for position in food_positions ]
+            positions = list(set([ position[0] for position in food_positions ]) - set(potential_snake_positions))
             print positions
             print [ board.get_cell(position) for position in positions ]
 
@@ -93,7 +99,7 @@ def move():
     else:
         with timing("fast_find_safest_position", time_remaining):
             positions = fast_find_safest_position(snake.head, direction, board)
-            positions = [ position[0] for position in positions ]
+            positions = list(set([position[0] for position in positions]) - set(potential_snake_positions))
             print positions
             print [ board.get_cell(position) for position in positions ]
 
