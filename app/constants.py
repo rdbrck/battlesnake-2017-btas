@@ -3,6 +3,8 @@ ADVSNAKE = 3
 
 PING = 50
 
+SNAKE_NAME = "ASDASD"
+
 UP = "up"
 DOWN = "down"
 LEFT = "left"
