@@ -4,6 +4,7 @@ import time
 import random
 
 from collections import deque
+from entities import Board
 
 from utils import neighbours, surrounding, dist, mul, sub, timing
 from constants import DIR_NAMES, DIR_VECTORS, FOOD, EMPTY, SNAKE
@@ -100,13 +101,13 @@ def fast_find_safest_position(current_position, direction, board):
     m_bounds = [(0, 0), (board.width, board.height)]
     max_depth = 10
 
-    board_copy = Board(clone=board)
+    #board_copy = Board(clone=board)
 
-    for x in board_copy.width:
-        for y in board_copy.height:
-            board_copy.set_cell_meta((x, y), _rate_cell((x, y), board))
+    #for x in board_copy.width:
+    #    for y in board_copy.height:
+    #        board_copy.set_cell_meta((x, y), _rate_cell((x, y), board))
 
-    print board_copy.format_meta()
+    #print board_copy.format_meta()
 
     def _find_safest(bounds = m_bounds, offset = (0, 0), depth = 0, carry = []):
         sector_width = (bounds[1][0] - bounds[0][0])
@@ -200,11 +201,10 @@ def bfs(starting_position, target_position, board, exclude, return_list):
     y = starting_position[1]
     board_copy = deepcopy(board)
     board_copy.set_cell((x, y), 0)
-    for exclude_move in exclude:
-        for exclude_point in exclude_move:
-            board_copy.set_cell(exclude_point, -1)
+    for excluded_point in exclude:
+        board_copy.set_cell(excluded_point, "B")
     # [ board_copy.set_cell((cell[0], cell[1]), -1) for cell in exclude ]
-    # print board_copy.format()
+    print board_copy.format()
     queue = deque([(x, y, None)])
     while len(queue) > 0:
         node = queue.popleft()
@@ -215,13 +215,16 @@ def bfs(starting_position, target_position, board, exclude, return_list):
             if (x, y) == target_position: # If we reach target_position
                 return get_path_from_nodes(node) # Rebuild path
 
-            if board_copy.outside((x, y)) == True or board_copy.get_cell((x, y)) == -1 or board_copy.get_cell((x, y)) == 1: # Snakes
+            if (board_copy.outside((x, y)) == True or board_copy.get_cell((x, y)) == "B" or board_copy.get_cell((x, y)) == 1) and not (x, y) == starting_position: # Snakes
+                #print "exclude", (x, y)
                 continue
 
-            board_copy.set_cell((x, y), -1) # Mark as explored
+            board_copy.set_cell((x, y), "B") # Mark as explored
 
             for i in neighbours(node):
-                queue.append((i[0], i[1], node))
+                if board.inside((i[0], i[1])):
+                    #print "append", (x, y)
+                    queue.append((i[0], i[1], node))
 
     return None # No path
 
