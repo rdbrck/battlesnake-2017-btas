@@ -1,7 +1,7 @@
 from constants import TAUNTS, SNAKE_NAME, PING, DIR_NAMES, DIR_VECTORS
 from entities import Snake, Board
 from strategy import general_direction, need_food
-from utils import timing, get_direction, add
+from utils import timing, get_direction, add, neighbours
 from algorithms import bfs, fast_find_safest_position, find_food, flood_fill
 from multiprocessing.pool import ThreadPool
 import Queue
@@ -76,12 +76,27 @@ def move():
             if enemy_snake.attributes['id'] != snake.attributes['id']: # and enemy_snake.attributes['health_points'] >= snake.attributes['health_points']:
                 potential_snake_positions.extend([position for position in enemy_snake.potential_positions() if board.inside(position)])
 
+        number_of_squares = list()
+        #Find number of empty squares in every direction.
+        for cell in neighbours(snake.head):
+            if board.inside(cell):
+                count = len(flood_fill(board, cell, False))
+                number_of_squares.append((cell, count))
+                if count <= 10: potential_snake_positions.append(cell)
+
+        if number_of_squares[0][1] <= 10 and number_of_squares[1][1] <= 10 and number_of_squares[2][1] <= 10 and number_of_squares[3][1] <= 10:
+            largest = reduce(lambda carry, direction: carry if carry[1] > direction[1] else direction, number_of_squares, number_of_squares[0])
+            potential_snake_positions.remove(largest[0])
+
         print potential_snake_positions
 
         with timing("need_food", time_remaining):
             food = need_food(board, snake.head, snake.attributes['health_points'])
 
         if food:
+            if snake.attributes['health_points'] < 30:
+                potential_snake_positions = []
+
             with timing("find_food", time_remaining):
                 food_positions = find_food(snake.head, snake.attributes['health_points'], board, food)
                 positions = [ position[0] for position in food_positions ]
@@ -101,7 +116,6 @@ def move():
 
                 path = min(next_move, key=len)
                 move = get_direction(snake.head, path[0])
-
         else:
             #with timing("flood_fill", time_remaining):
                 # flood_fill(board.vacant, snake.head, True)
