@@ -170,7 +170,7 @@ def find_food(current_position, health_remaining, board, board_food):
     # rated_food = filter(lambda food: dist(food[0], current_position) < health_remaining, rated_food)
     # return reduce(lambda carry, food: food if not carry[0] or food[1] > carry[1] else carry, rated_food, (None, None))
 
-def bfs(starting_position, target_position, board, return_list, exclude = []):
+def bfs(starting_position, target_position, board, exclude, return_list):
     """ BFS implementation to search for path to food
 
         :param starting_position: starting position
@@ -181,7 +181,6 @@ def bfs(starting_position, target_position, board, return_list, exclude = []):
 
         bfs((0,0), (2,2), board) -> [(0,0), (0,1), (0,2), (1,2), (2,2)]
     """
-
     def get_path_from_nodes(node):
         path = []
         while(node != None):
@@ -193,10 +192,12 @@ def bfs(starting_position, target_position, board, return_list, exclude = []):
     y = starting_position[1]
     board_copy = deepcopy(board)
     board_copy.set_cell((x, y), 0)
+    for exclude_move in exclude:
+        for exclude_point in exclude_move:
+            board_copy.set_cell(exclude_point, -1)
     # [ board_copy.set_cell((cell[0], cell[1]), -1) for cell in exclude ]
     # print board_copy.format()
     queue = deque([(x, y, None)])
-
     while len(queue) > 0:
         node = queue.popleft()
         x = node[0]

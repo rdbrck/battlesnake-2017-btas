@@ -71,30 +71,33 @@ def move():
     move = None
     next_move = list()
     thread_pool = list()
+    potential_snake_positions = list()
+    #  = reduce(
+    #     lambda carry, m_snake: carry + m_snake.potential_positions() if len(m_snake) >= len(snake) else [],
+    #     board.snakes,
+    #     []
+    # )
 
-    potential_snake_positions = reduce(
-        lambda carry, m_snake: carry + m_snake.potential_positions() if len(m_snake) >= len(snake) else [],
-        board.snakes,
-        []
-    )
-
-    potential_snake_positions = filter(lambda cell: board.inside(cell), potential_snake_positions)
-    potential_snake_positions = list(set(potential_snake_positions) - set(snake.potential_positions()))
+    # potential_snake_positions = filter(lambda cell: board.inside(cell), potential_snake_positions)
+    # potential_snake_positions = list(set(potential_snake_positions) - set(snake.potential_positions()))
 
     #print snake.attributes['health_points']
     #print snake.potential_positions()
     #print potential_snake_positions
+    for enemy_snake in board.snakes:
+        if enemy_snake.attributes['id'] != snake.attributes['id'] and enemy_snake.attributes['health_points'] >= snake.attributes['health_points']:
+            potential_snake_positions.append(enemy_snake.potential_positions())
 
     if food:
         with timing("find_food", time_remaining):
             food_positions = find_food(snake.head, snake.attributes['health_points'], board, food)
             positions = [ position[0] for position in food_positions ]
             # positions = list(set([ position[0] for position in food_positions ]) - set(potential_snake_positions))
-            print positions
-            print [ board.get_cell(position) for position in positions ]
+            # print positions
+            # print [ board.get_cell(position) for position in positions ]
 
             for i in range(len(positions)):
-                t = Thread(target=bfs(snake.head, positions[i], board, next_move))
+                t = Thread(target=bfs(snake.head, positions[i], board, potential_snake_positions, next_move))
                 thread_pool.append(t)
 
             for thread in thread_pool:
@@ -113,11 +116,11 @@ def move():
             positions = fast_find_safest_position(snake.head, direction, board)
             positions = [ position[0] for position in positions ]
             # positions = list(set([position[0] for position in positions]) - set(potential_snake_positions))
-            print positions
-            print [ board.get_cell(position) for position in positions ]
+            # print positions
+            # print [ board.get_cell(position) for position in positions ]
 
             for i in range(len(positions)):
-                t = Thread(target=bfs(snake.head, positions[i], board, next_move, exclude = potential_snake_positions))
+                t = Thread(target=bfs(snake.head, positions[i], board, potential_snake_positions, next_move))
                 thread_pool.append(t)
 
             for thread in thread_pool:
