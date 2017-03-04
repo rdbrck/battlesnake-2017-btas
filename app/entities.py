@@ -133,4 +133,4 @@ class Board(object):
         bar = '-' * (len(self.cells) * len(v) + 2) + '\n'
         s.insert(0, bar)
         s.append(bar)
-        return ' '.join(s)
+        return '\t'.join(s)

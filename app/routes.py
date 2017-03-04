@@ -42,10 +42,10 @@ def start():
         color = "#123456"
 
     return {
-        'color': color,
+        'color': '#ff0000',
         'taunt': random.choice(TAUNTS),
         'head_url': ('http://%s/static/uneil.gif' % bottle.request.get_header('host')),
-        'name': color,
+        'name': 'BETTER THAN ALEKSIY\'S SNAKE',
         'head_type': 'safe',
         'tail_type': 'freckled'
     }
@@ -71,29 +71,44 @@ def move():
     move = direction
     next_move = list()
     thread_pool = list()
+    potential_snake_positions = list()
+
+    for enemy_snake in board.snakes:
+        if enemy_snake.attributes['id'] != snake.attributes['id'] and enemy_snake.attributes['health_points'] >= snake.attributes['health_points']:
+            potential_snake_positions.append(enemy_snake.potential_positions())
 
     if food:
         with timing("find_food", time_remaining):
             food_positions = find_food(snake.head, snake.attributes['health_points'], board, food)
             positions = [ position[0] for position in food_positions ]
-            print positions
-            print [ board.get_cell(position) for position in positions ]
 
+            for i in range(len(positions)):
+                t = Thread(target=bfs(snake.head, positions[i], board, potential_snake_positions, next_move))
+                thread_pool.append(t)
+
+            for thread in thread_pool:
+                thread.start()
+                thread.join()
+
+            next_move = filter(lambda path: not len(path) == 0, next_move)
+            path = min(next_move, key=len)
+            move = get_direction(snake.head, path[0])
     else:
         with timing("fast_find_safest_position", time_remaining):
             positions = fast_find_safest_position(snake.head, direction, board)
             positions = [ position[0] for position in positions ]
-            print positions
-            print [ board.get_cell(position) for position in positions ]
 
-    with timing("bfs", time_remaining):
-        for i in range(len(positions)):
-            t = Thread(target=bfs(snake.head, positions[i], board, next_move))
-            thread_pool.append(t)
+            for i in range(len(positions)):
+                t = Thread(target=bfs(snake.head, positions[i], board, potential_snake_positions, next_move))
+                thread_pool.append(t)
 
-        for thread in thread_pool:
-            thread.start()
-            thread.join()
+            for thread in thread_pool:
+                thread.start()
+                thread.join()
+
+            #print next_move
+            path = max(next_move, key=len)
+            move = get_direction(snake.head, path[0])
 
     if len(next_move) == 0:
         with timing("floodfill", time_remaining):
