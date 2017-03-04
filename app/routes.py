@@ -2,7 +2,7 @@ from constants import TAUNTS, SNAKE_NAME, PING
 from entities import Snake, Board
 from strategy import general_direction, need_food
 from utils import timing, get_direction
-from algorithms import bfs, fast_find_safest_position, find_food
+from algorithms import bfs, fast_find_safest_position, find_food, flood_fill
 from multiprocessing.pool import ThreadPool
 import Queue
 from threading import Thread, Lock
@@ -53,80 +53,73 @@ def start():
 
 @bottle.post('/move')
 def move():
+    data = {}
     time_remaining = [150]
-
-    with timing("bottle shit", time_remaining):
-        data = bottle.request.json
-
-    with timing("data parsing", time_remaining):
-        board = Board(**data)
-        snake = board.get_snake(data['you'])
-        direction = general_direction(board, snake.head, snake.attributes['health_points'])
-
-    with timing("need_food", time_remaining):
-        food = need_food(board, snake.head, snake.attributes['health_points'])
-
     position = None
     path = None
     move = None
     next_move = list()
     thread_pool = list()
+    direction = None
 
-    potential_snake_positions = reduce(
-        lambda carry, m_snake: carry + m_snake.potential_positions() if len(m_snake) >= len(snake) else [],
-        board.snakes,
-        []
-    )
+    with timing("bottle shit", time_remaining):
+        data = bottle.request.json
 
-    potential_snake_positions = filter(lambda cell: board.inside(cell), potential_snake_positions)
-    potential_snake_positions = list(set(potential_snake_positions) - set(snake.potential_positions()))
+    try:
+        with timing("data parsing", time_remaining):
+            board = Board(**data)
+            snake = board.get_snake(data['you'])
+            direction = general_direction(board, snake.head, snake.attributes['health_points'])
 
-    #print snake.attributes['health_points']
-    #print snake.potential_positions()
-    #print potential_snake_positions
+        with timing("need_food", time_remaining):
+            food = need_food(board, snake.head, snake.attributes['health_points'])
 
-    if food:
-        with timing("find_food", time_remaining):
-            food_positions = find_food(snake.head, snake.attributes['health_points'], board, food)
-            positions = [ position[0] for position in food_positions ]
-            # positions = list(set([ position[0] for position in food_positions ]) - set(potential_snake_positions))
-            print positions
-            print [ board.get_cell(position) for position in positions ]
+        if food:
+            with timing("find_food", time_remaining):
+                food_positions = find_food(snake.head, snake.attributes['health_points'], board, food)
+                positions = [ position[0] for position in food_positions ]
+                # positions = list(set([ position[0] for position in food_positions ]) - set(potential_snake_positions))
+                print positions
+                print [ board.get_cell(position) for position in positions ]
 
-            for i in range(len(positions)):
-                t = Thread(target=bfs(snake.head, positions[i], board, next_move))
-                thread_pool.append(t)
+                for i in range(len(positions)):
+                    t = Thread(target=bfs(snake.head, positions[i], board, next_move))
+                    thread_pool.append(t)
 
-            for thread in thread_pool:
-                thread.start()
-                thread.join()
+                for thread in thread_pool:
+                    thread.start()
+                    thread.join()
 
-            #print next_move
+                #print next_move
 
-            next_move = filter(lambda path: not len(path) == 0, next_move)
-            #print next_move
-            path = min(next_move, key=len)
-            move = get_direction(snake.head, path[0])
+                next_move = filter(lambda path: not len(path) == 0, next_move)
+                #print next_move
+                path = min(next_move, key=len)
+                move = get_direction(snake.head, path[0])
 
-    else:
-        with timing("fast_find_safest_position", time_remaining):
-            positions = fast_find_safest_position(snake.head, direction, board)
-            positions = [ position[0] for position in positions ]
-            # positions = list(set([position[0] for position in positions]) - set(potential_snake_positions))
-            print positions
-            print [ board.get_cell(position) for position in positions ]
+        else:
+            with timing("flood_fill", time_remaining):
+                flood_fill(board.vacant, snake.head, True)
+            with timing("fast_find_safest_position", time_remaining):
+                positions = fast_find_safest_position(snake.head, direction, board)
+                positions = [ position[0] for position in positions ]
+                # positions = list(set([position[0] for position in positions]) - set(potential_snake_positions))
+                print positions
+                print [ board.get_cell(position) for position in positions ]
 
-            for i in range(len(positions)):
-                t = Thread(target=bfs(snake.head, positions[i], board, next_move, exclude = potential_snake_positions))
-                thread_pool.append(t)
+                for i in range(len(positions)):
+                    t = Thread(target=bfs(snake.head, positions[i], board, next_move))
+                    thread_pool.append(t)
 
-            for thread in thread_pool:
-                thread.start()
-                thread.join()
+                for thread in thread_pool:
+                    thread.start()
+                    thread.join()
 
-            #print next_move
-            path = max(next_move, key=len)
-            move = get_direction(snake.head, path[0])
+                #print next_move
+                path = max(next_move, key=len)
+                move = get_direction(snake.head, path[0])
+    except Exception as e:
+        print "WTF", e.message
 
     print "moving", move
     return {

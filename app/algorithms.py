@@ -84,14 +84,14 @@ def astar(vacant_func, start_pos, goal_pos, allow_start_in_occupied_cell=False):
 
     return None
 
-def _rate_cell(cell, board, depth = 0):
+def _rate_cell(cell, board, recurse = False):
     cells = filter(lambda m_cell: board.inside(m_cell), surrounding(cell))
     cells = map(lambda m_cell: (m_cell, board.get_cell(m_cell)), cells)
     cell_value = reduce(lambda carry, m_cell: carry + [0.5, -5, 2, 0][m_cell[1]], cells, 0)
 
-    if depth >= 2 or cell_value < 2: return cell_value
+    if recurse or cell_value < 2: return cell_value
     else: return cell_value + sum([
-        _rate_cell(m_cell, board, depth + 1) / 10
+        _rate_cell(m_cell, board) / 10
         for m_cell in surrounding(cell) if board.inside(m_cell)
     ])
 
@@ -99,6 +99,14 @@ def fast_find_safest_position(current_position, direction, board):
     # the whole board
     m_bounds = [(0, 0), (board.width, board.height)]
     max_depth = 10
+
+    board_copy = Board(clone=board)
+
+    for x in board_copy.width:
+        for y in board_copy.height:
+            board_copy.set_cell_meta((x, y), _rate_cell((x, y), board))
+
+    print board_copy.format_meta()
 
     def _find_safest(bounds = m_bounds, offset = (0, 0), depth = 0, carry = []):
         sector_width = (bounds[1][0] - bounds[0][0])
@@ -115,7 +123,7 @@ def fast_find_safest_position(current_position, direction, board):
             # filter cells that we've already rated
             carry_cells = [ cell[0] for cell in carry ]
             surrounding_ratings = [
-                ((cell[0], cell[1]), _rate_cell((cell[0], cell[1]), board, 0))
+                ((cell[0], cell[1]), _rate_cell((cell[0], cell[1]), board, True))
                 for cell in surrounding(center_point)
                 if cell not in carry_cells and board.inside(cell) and board.get_cell(cell) != SNAKE
             ]
@@ -164,7 +172,7 @@ def fast_find_safest_position(current_position, direction, board):
 
 
 def find_food(current_position, health_remaining, board, board_food):
-    rated_food = map(lambda food: (food, _rate_cell(food, board, 0)), board_food)
+    rated_food = map(lambda food: (food, _rate_cell(food, board, True)), board_food)
 
     return sorted(rated_food, lambda food_1, food_2: food_1[1] > food_2[1])
     # rated_food = filter(lambda food: dist(food[0], current_position) < health_remaining, rated_food)

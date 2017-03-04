@@ -100,6 +100,9 @@ class Board(object):
     def get_cell(self, pos):
         return self.cells[pos[0]][pos[1]]
 
+    def set_cell_meta(self, pos, meta):
+        self.meta_cells[pos[0]][pos[1]] = meta
+
     def get_cell_meta(self, pos):
         return self.meta_cells[pos[0]][pos[1]]
 
@@ -121,6 +124,19 @@ class Board(object):
 
     def __str__(self):
         return self.format(lambda v: ' ' if v == 0 else '{:d}'.format(v))
+
+    def format_meta(self):
+        s = []
+        for y in range(self.height):
+            s.append('|')
+            for x in range(self.width):
+                v = str(self.meta_cells[x][y])
+                s.append(v)
+            s.append('|\n')
+        bar = '-' * (len(self.meta_cells) * len(v) + 2) + '\n'
+        s.insert(0, bar)
+        s.append(bar)
+        return '\t'.join(s)
 
     def format(self):
         s = []
