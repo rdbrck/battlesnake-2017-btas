@@ -11,7 +11,7 @@ from math import floor, ceil
 
 from copy import copy, deepcopy
 
-def flood_fill(vacant_func, start_pos, allow_start_in_occupied_cell=False):
+def flood_fill(board, start_pos, allow_start_in_occupied_cell=False):
     """ Flood fill is an algorithm that expands from a starting position into adjacent
     vacant cells. Returns the set of all vacant cells found.
 
@@ -19,7 +19,7 @@ def flood_fill(vacant_func, start_pos, allow_start_in_occupied_cell=False):
     and the start position will be included in the resulting set. """
     visited = set()
 
-    if not allow_start_in_occupied_cell and not vacant_func(start_pos):
+    if not allow_start_in_occupied_cell and not board.vacant(start_pos):
         return visited
 
     visited.add(start_pos)
@@ -28,7 +28,7 @@ def flood_fill(vacant_func, start_pos, allow_start_in_occupied_cell=False):
     while todo:
         current = todo.popleft()
         for p in neighbours(current):
-            if p not in visited and vacant_func(p):
+            if p not in visited and board.vacant(p):
                 visited.add(p)
                 todo.append(p)
 

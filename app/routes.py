@@ -2,7 +2,7 @@ from constants import TAUNTS, SNAKE_NAME, PING
 from entities import Snake, Board
 from strategy import general_direction, need_food
 from utils import timing, get_direction
-from algorithms import bfs, fast_find_safest_position, find_food
+from algorithms import bfs, fast_find_safest_position, find_food, flood_fill
 from multiprocessing.pool import ThreadPool
 import Queue
 from threading import Thread, Lock
@@ -68,7 +68,7 @@ def move():
 
     position = None
     path = None
-    move = None
+    move = direction
     next_move = list()
     thread_pool = list()
 
@@ -79,17 +79,6 @@ def move():
             print positions
             print [ board.get_cell(position) for position in positions ]
 
-            for i in range(len(positions)):
-                t = Thread(target=bfs(snake.head, positions[i], board, next_move))
-                thread_pool.append(t)
-
-            for thread in thread_pool:
-                thread.start()
-                thread.join()
-
-            path = min(next_move, key=len)
-            move = get_direction(snake.head, path[0])
-
     else:
         with timing("fast_find_safest_position", time_remaining):
             positions = fast_find_safest_position(snake.head, direction, board)
@@ -97,16 +86,27 @@ def move():
             print positions
             print [ board.get_cell(position) for position in positions ]
 
-            for i in range(len(positions)):
-                t = Thread(target=bfs(snake.head, positions[i], board, next_move))
-                thread_pool.append(t)
+    with timing("bfs", time_remaining):
+        for i in range(len(positions)):
+            t = Thread(target=bfs(snake.head, positions[i], board, next_move))
+            thread_pool.append(t)
 
-            for thread in thread_pool:
-                thread.start()
-                thread.join()
+        for thread in thread_pool:
+            thread.start()
+            thread.join()
 
-            path = max(next_move, key=len)
-            move = get_direction(snake.head, path[0])
+    if len(next_move) == 0:
+        with timing("floodfill", time_remaining):
+            floods = {
+                "up": len(flood_fill(board, (snake.head[0],snake.head[1]-1))),
+                "down": len(flood_fill(board, (snake.head[0],snake.head[1]+1))),
+                "right": len(flood_fill(board, (snake.head[0]+1,snake.head[1]))),
+                "left": len(flood_fill(board, (snake.head[0]-1,snake.head[1])))
+            }
+            move = max(floods.iterkeys(), key=(lambda key: floods[key]))
+    else:
+        path = max(next_move, key=len)
+        move = get_direction(snake.head, path[0])
 
     print "moving", move
     return {
