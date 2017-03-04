@@ -57,19 +57,24 @@ def move():
     time_remaining = [150]
     position = None
     path = None
-    move = None
     next_move = list()
     thread_pool = list()
+    potential_snake_positions = list()
     direction = None
 
     with timing("bottle shit", time_remaining):
         data = bottle.request.json
 
     try:
+        for enemy_snake in board.snakes:
+            if enemy_snake.attributes['id'] != snake.attributes['id'] and enemy_snake.attributes['health_points'] >= snake.attributes['health_points']:
+                potential_snake_positions.append(enemy_snake.potential_positions())
+
         with timing("data parsing", time_remaining):
             board = Board(**data)
             snake = board.get_snake(data['you'])
             direction = general_direction(board, snake.head, snake.attributes['health_points'])
+            move = direction # fallback
 
         with timing("need_food", time_remaining):
             food = need_food(board, snake.head, snake.attributes['health_points'])
@@ -90,10 +95,8 @@ def move():
                     thread.start()
                     thread.join()
 
-                #print next_move
-
                 next_move = filter(lambda path: not len(path) == 0, next_move)
-                #print next_move
+
                 path = min(next_move, key=len)
                 move = get_direction(snake.head, path[0])
 
@@ -108,18 +111,32 @@ def move():
                 print [ board.get_cell(position) for position in positions ]
 
                 for i in range(len(positions)):
-                    t = Thread(target=bfs(snake.head, positions[i], board, next_move))
+                    t = Thread(target=bfs(snake.head, positions[i], board, potential_snake_positions, next_move))
                     thread_pool.append(t)
 
                 for thread in thread_pool:
                     thread.start()
                     thread.join()
 
-                #print next_move
                 path = max(next_move, key=len)
                 move = get_direction(snake.head, path[0])
     except Exception as e:
         print "WTF", e.message
+
+
+    if len(next_move) == 0:
+        with timing("floodfill", time_remaining):
+            floods = {
+                "up": len(flood_fill(board, (snake.head[0],snake.head[1]-1))),
+                "down": len(flood_fill(board, (snake.head[0],snake.head[1]+1))),
+                "right": len(flood_fill(board, (snake.head[0]+1,snake.head[1]))),
+                "left": len(flood_fill(board, (snake.head[0]-1,snake.head[1])))
+            }
+
+            move = max(floods.iterkeys(), key=(lambda key: floods[key]))
+    else:
+        path = max(next_move, key=len)
+        move = get_direction(snake.head, path[0])
 
     print "moving", move
     return {
