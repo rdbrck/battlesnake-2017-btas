@@ -73,6 +73,21 @@ def move():
     thread_pool = list()
     potential_snake_positions = list()
 
+    number_of_squares = []
+    iterator_floodfill = 0
+    #Find number of empty squares in every direction.
+    for move_point in neighbours(snake.head):
+        number_of_squares[iterator_floodfill] = (move_point, len(floodfill(vacant_func, move_point, False)))
+        if number_of_squares[iterator_floodfill][1] <= 10:
+            potential_snake_positions.append(move_point)
+        iterator_floodfill = iterator_floodfill + 1
+
+    #if all <= 10, move into largest
+    if number_of_squares[0][1] <= 10 and number_of_squares[1][1] <= 10 and number_of_squares[2][1] <= 10 and number_of_squares[3][1] <= 10:
+        largest = reduce(lambda carry, direction: carry if carry[1] > direction[1] else direction, number_of_squares, number_of_squares[0])
+        # remove from invalid
+        potential_snake_positions.remove(largest[0])
+
     for enemy_snake in board.snakes:
         if enemy_snake.attributes['id'] != snake.attributes['id'] and enemy_snake.attributes['health_points'] >= snake.attributes['health_points']:
             potential_snake_positions.append(enemy_snake.potential_positions())
@@ -105,10 +120,6 @@ def move():
             for thread in thread_pool:
                 thread.start()
                 thread.join()
-
-            #print next_move
-            path = max(next_move, key=len)
-            move = get_direction(snake.head, path[0])
 
     if len(next_move) == 0:
         with timing("floodfill", time_remaining):
