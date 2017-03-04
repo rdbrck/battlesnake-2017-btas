@@ -94,8 +94,8 @@ def move():
             food = need_food(board, snake.head, snake.attributes['health_points'])
 
         if food:
-            if snake.attributes['health_points'] < 30:
-                potential_snake_positions = []
+            #if snake.attributes['health_points'] < 30:
+                #potential_snake_positions = []
 
             with timing("find_food", time_remaining):
                 food_positions = find_food(snake.head, snake.attributes['health_points'], board, food)
@@ -104,8 +104,10 @@ def move():
                 print positions
                 print [ board.get_cell(position) for position in positions ]
 
-                for i in range(len(positions)):
-                    t = Thread(target=bfs(snake.head, positions[i], board, potential_snake_positions, next_move))
+                for position in positions:
+                    t = Thread(target=bfs(snake.head, position, board, potential_snake_positions, next_move))
+                    t = Thread(target=bfs(snake.head, position, board, [], next_move))
+
                     thread_pool.append(t)
 
                 for thread in thread_pool:
@@ -126,8 +128,10 @@ def move():
                 print positions
                 print [ board.get_cell(position) for position in positions ]
 
-                for i in range(len(positions)):
-                    t = Thread(target=bfs(snake.head, positions[i], board, potential_snake_positions, next_move))
+                for position in positions:
+                    t = Thread(target=bfs(snake.head, position, board, potential_snake_positions, next_move))
+                    t = Thread(target=bfs(snake.head, position, board, [], next_move))
+
                     thread_pool.append(t)
 
                 for thread in thread_pool:
@@ -141,8 +145,10 @@ def move():
 
     print next_move
     print path
+    print move
 
     if len(next_move) == 0:
+        print "CHANGING MOVE"
         with timing("floodfill", time_remaining):
             floods = {
                 "up": len(flood_fill(board, (snake.head[0],snake.head[1]-1))),
@@ -152,16 +158,13 @@ def move():
             }
 
             move = max(floods.iterkeys(), key=(lambda key: floods[key]))
-    else:
-        path = max(next_move, key=len)
-        move = get_direction(snake.head, path[0])
 
     # don't be stupid
     m_move = add(snake.head, DIR_VECTORS[DIR_NAMES.index(move)])
     if board.inside(m_move) and board.get_cell(m_move) == 1:
         print "CHANGING MOVE"
         for direction in DIR_NAMES:
-            m_moveadd(snake.head, DIR_VECTORS[DIR_NAMES.index(direction)])
+            m_move = add(snake.head, DIR_VECTORS[DIR_NAMES.index(direction)])
             if board.inside(m_move) and board.get_cell() != 1:
                 move = direction
 

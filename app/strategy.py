@@ -67,9 +67,9 @@ def need_food(board, head, health):
     num_snakes = len(board.snakes)
 
     # if we really need food go for it even if it's not 'safe'
-    if health < 40:
+    if health < 50:
         for food in board.food:
-            if (health + dist(head, food)) < 40:
+            if (health + dist(head, food)) < 50:
                 food_to_get.append(food)
 
     if len(food_to_get) > 0:
