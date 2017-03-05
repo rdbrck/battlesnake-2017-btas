@@ -165,7 +165,7 @@ def move():
         print "CHANGING MOVE"
         for direction in DIR_NAMES:
             m_move = add(snake.head, DIR_VECTORS[DIR_NAMES.index(direction)])
-            if board.inside(m_move) and board.get_cell() != 1:
+            if board.inside(m_move) and board.get_cell(m_move) != 1:
                 move = direction
 
     print "moving", move
