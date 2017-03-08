@@ -1,4 +1,5 @@
 # BtAS - Better than Aleksiy's Snake
+## 🥇 first place winner of Battlesnake 2017 advanced division 🎉
 
 #### who wrote me
 
