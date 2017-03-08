@@ -18,6 +18,7 @@ def flood_fill(board, start_pos, allow_start_in_occupied_cell=False):
 
     If allow_start_in_occupied_cell is True, the flood fill start position may be occupied
     and the start position will be included in the resulting set. """
+
     visited = set()
 
     if not allow_start_in_occupied_cell and not board.vacant(start_pos):
@@ -86,6 +87,7 @@ def astar(vacant_func, start_pos, goal_pos, allow_start_in_occupied_cell=False):
     return None
 
 def _rate_cell(cell, board, recurse = False):
+    """ rates a cell based on proximity to other snakes, food, the edge of the board, etc """
     cells = filter(lambda m_cell: board.inside(m_cell), surrounding(cell))
     cells = map(lambda m_cell: (m_cell, board.get_cell(m_cell)), cells)
     cell_value = reduce(lambda carry, m_cell: carry + [0.5, -5, 2, 0][m_cell[1]], cells, 0)
@@ -96,18 +98,14 @@ def _rate_cell(cell, board, recurse = False):
         for m_cell in surrounding(cell) if board.inside(m_cell)
     ])
 
-def fast_find_safest_position(current_position, direction, board):
+def find_safest_position(current_position, direction, board):
+    """ finds a position in a binary-search like fashion, this could probably just
+    linearly scan the whole board, rating every position, and then returning the highest n
+    positions """
+
     # the whole board
     m_bounds = [(0, 0), (board.width, board.height)]
     max_depth = 10
-
-    #board_copy = Board(clone=board)
-
-    #for x in board_copy.width:
-    #    for y in board_copy.height:
-    #        board_copy.set_cell_meta((x, y), _rate_cell((x, y), board))
-
-    #print board_copy.format_meta()
 
     def _find_safest(bounds = m_bounds, offset = (0, 0), depth = 0, carry = []):
         sector_width = (bounds[1][0] - bounds[0][0])
@@ -173,6 +171,7 @@ def fast_find_safest_position(current_position, direction, board):
 
 
 def find_food(current_position, health_remaining, board, board_food):
+    """ finds and rates food positions """
     rated_food = map(lambda food: (food, _rate_cell(food, board, True)), board_food)
 
     return sorted(rated_food, lambda food_1, food_2: food_1[1] > food_2[1])
@@ -190,6 +189,7 @@ def bfs(starting_position, target_position, board, exclude, return_list):
 
         bfs((0,0), (2,2), board) -> [(0,0), (0,1), (0,2), (1,2), (2,2)]
     """
+
     def get_path_from_nodes(node):
         path = []
         while(node != None):
@@ -203,7 +203,7 @@ def bfs(starting_position, target_position, board, exclude, return_list):
     board_copy.set_cell((x, y), 0)
     for excluded_point in exclude:
         board_copy.set_cell(excluded_point, "B")
-    # [ board_copy.set_cell((cell[0], cell[1]), -1) for cell in exclude ]
+
     print board_copy.format()
     queue = deque([(x, y, None)])
     while len(queue) > 0:
@@ -227,66 +227,3 @@ def bfs(starting_position, target_position, board, exclude, return_list):
                     queue.append((i[0], i[1], node))
 
     return None # No path
-
-
-def _longest_path(vacant_func, current, open_set, current_path, longest_path, deadline):
-    if time.time() > deadline:
-        return False, False  # (not-found, non-maximal)
-
-    for p in neighbours(current):
-        if p in open_set and vacant_func(p):
-            current_path.append(p)
-            open_set.discard(p)
-
-            if len(current_path) > len(longest_path):
-                longest_path.clear()
-                longest_path.extend(current_path)
-
-                if not open_set:
-                    return True, True  # (found, maximal)
-
-            found, maximal = _longest_path(vacant_func, p, open_set, current_path, longest_path, deadline)
-
-            if found:
-                return found, maximal
-
-            open_set.add(p)
-            current_path.pop()
-
-    return False, False  # (not-found, non-maximal)
-
-
-def longest_path(vacant_func, start_pos, allow_start_in_occupied_cell=False, max_wait_seconds=0.3):
-    """ This is a backtracking algorithm that will try to find a path which travels through every vacant
-    cell of the area in which you seed it.
-
-    Set max_wait_seconds to control how long the algorithm will spend looking (In practice, it finds a very
-    good solution extremely quickly, and then spends ages looking for the ideal one).
-
-    If allow_start_in_occupied_cell is True, the search may begin from an occupied cell
-    (a snake's head, for eg).  However, if you do this, you'll probably want to trim off
-    the first position in the resulting longest path. """
-
-    open_set = flood_fill(vacant_func, start_pos, allow_start_in_occupied_cell=allow_start_in_occupied_cell)
-    current_path = [start_pos]
-    longest_path = [start_pos]
-    open_set.discard(start_pos)
-    found, maximal = _longest_path(vacant_func, start_pos, open_set, current_path, longest_path, time.time() + max_wait_seconds)
-
-    return longest_path, maximal
-
-
-if __name__ == "__main__":
-    from entities import Board
-    import json
-
-    with open('move_fixture.json', 'r') as f:
-        data = json.load(f)
-        board = Board(**data)
-        snake = board.get_snake(data['you'])
-
-    with timing("find_safe_position", [200]):
-        print find_safe_position(snake.head, "down", board)
-
-    with timing("fast_find_safest_position", [200]):
-        print fast_find_safest_position(snake.head, "right", board)
