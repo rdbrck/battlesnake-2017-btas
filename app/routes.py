@@ -2,7 +2,7 @@ from constants import TAUNTS, SNAKE_NAME, PING, DIR_NAMES, DIR_VECTORS
 from entities import Snake, Board
 from strategy import general_direction, need_food
 from utils import timing, get_direction, add, neighbours
-from algorithms import bfs, fast_find_safest_position, find_food, flood_fill
+from algorithms import bfs, find_safest_position, find_food, flood_fill
 from multiprocessing.pool import ThreadPool
 import Queue
 from threading import Thread, Lock
@@ -54,7 +54,7 @@ def start():
 @bottle.post('/move')
 def move():
     data = {}
-    time_remaining = [150]
+    time_remaining = [150] # leave 50ms for network
     position = None
     path = None
     next_move = list()
@@ -62,7 +62,7 @@ def move():
     potential_snake_positions = list()
     direction = None
 
-    with timing("bottle shit", time_remaining):
+    with timing("bottle", time_remaining):
         data = bottle.request.json
 
     try:
@@ -77,7 +77,7 @@ def move():
                 potential_snake_positions.extend([position for position in enemy_snake.potential_positions() if board.inside(position)])
 
         number_of_squares = list()
-        #Find number of empty squares in every direction.
+        # find number of empty squares in every direction.
         for cell in neighbours(snake.head):
             if board.inside(cell):
                 count = len(flood_fill(board, cell, False))
@@ -121,8 +121,8 @@ def move():
         else:
             #with timing("flood_fill", time_remaining):
                 # flood_fill(board.vacant, snake.head, True)
-            with timing("fast_find_safest_position", time_remaining):
-                positions = fast_find_safest_position(snake.head, direction, board)
+            with timing("find_safest_position", time_remaining):
+                positions = find_safest_position(snake.head, direction, board)
                 positions = [ position[0] for position in positions ]
                 # positions = list(set([position[0] for position in positions]) - set(potential_snake_positions))
                 print positions
@@ -165,7 +165,7 @@ def move():
         print "CHANGING MOVE"
         for direction in DIR_NAMES:
             m_move = add(snake.head, DIR_VECTORS[DIR_NAMES.index(direction)])
-            if board.inside(m_move) and board.get_cell() != 1:
+            if board.inside(m_move) and board.get_cell(m_move) != 1:
                 move = direction
 
     print "moving", move

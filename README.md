@@ -1,33 +1,56 @@
-# battlesnake-python
+# BtAS - Better than Alexsiy's Snake
 
-A simple [BattleSnake AI](http://battlesnake.io) written in Python. 
+#### who wrote me
 
-Visit [battlesnake.io/readme](http://battlesnake.io/readme) for API documentation and instructions for running your AI.
+* [Tyler Sebastian](https://github.com/tills13)
+* [Wayne Zhang](https://github.com/waynezhang1995)
+* [Mark Roller](https://github.com/rollerbrick)
+* [Kevin Mitchell](https://github.com/KevinMitchellREDBRICK)
 
-This AI client uses the [bottle web framework](http://bottlepy.org/docs/dev/index.html) to serve requests. Dependencies are listed in [requirements.txt](requirements.txt).
+#### what's our strat?
 
-#### You will need...
+tl;dr - pick a point, BFS, floodfill, catch errors, move
+
+Our strategy was to use a local search algorithm with everything we could think added in.
+
+It would start by choosing a general direction to move based on very simple information about the location of snakes and food (where they were, open space on board, distance to food compared to other snakes, our health, other snakes length, etc.) Once we picked a general direction we would look at all open spaces in that direction to evaluate how desirable they were (creating a list of rated spots). For each spot in this list we spawned a thread and ran a simple BFS to find the best path for each (pursuing the best). If nothing returned a path then we were trapped so we would floodfill in each direction and pick the longest path.
+
+This was the basic concept, but there were a lot of overrides – We made some squares invalid to move into, such as the ones around enemy snakes heads when they were larger than us. However, we also ignored that override if we were very hungry. Quick floodfill checks were also run on surrounding areas to make sure that we weren’t moving into a dead end.
+
+We were initially concerned about the 200ms response time limit. Following, we decided to avoid more complex algorithms such as Minimax or A*. However, the average response time for our snake on "production" hardware turned out to be ~30ms.
+
+#### who's Alexisy?
+
+Alexsiy is a Spring 2017 co-op at Rdbrck. He wrote [a competing battlesnake](https://github.com/aleksiy325/snek) in C++.
+
+#### hardware and environment
+
+BtAS was deployed to an m3.medium EC2 instance in the us-east AZ to minimize latency to the Battlesnake gameboard. The app itself was managed by uwsgi, running as a service behind nginx. Although, in hindsight, this is way more complicated than it needed to be.
+
+We decided against Heroku due to the tendency for heroku deployments to go into sleepmode after a period of inactivity.
+
+### you will need...
 
 * a working Python 2.7 development environment ([getting started guide](http://hackercodex.com/guide/python-development-environment-on-mac-osx/))
 * [pip](https://pip.pypa.io/en/latest/installing.html) to install Python dependencies
 
-## Running the Snake Locally
+### running BtAS
 
-1) [Fork this repo](https://github.com/sendwithus/battlesnake-python/fork).
+A virtualenv is suggested when installing python requirements, although it's not required.
 
-2) Clone repo to your development environment:
+Install dependencies using [pip](https://pip.pypa.io/en/latest/installing.html):
 ```
-git clone git@github.com:username/battlesnake-python.git
-```
-
-3) Install dependencies using [pip](https://pip.pypa.io/en/latest/installing.html):
-```
-pip install -r requirements.txt
+$ pip install -r requirements.txt
 ```
 
-4) Run local server:
+then either run the app directly
+
 ```
-python app/main.py
+$ python app.py # supply PORT to override default
 ```
 
-5) Test client in your browser: [http://localhost:8080](http://localhost:8080).
+or run it using uwsgi
+
+```
+$ uwsgi --ini uwsgi/battlesnake-dev.ini # adjust uwsgi params accordingly
+```
