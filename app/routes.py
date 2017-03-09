@@ -3,16 +3,12 @@ from entities import Snake, Board
 from strategy import general_direction, need_food
 from utils import timing, get_direction, add, neighbours
 from algorithms import bfs, find_safest_position, find_food, flood_fill
-from multiprocessing.pool import ThreadPool
-import Queue
-from threading import Thread, Lock
+from threading import Thread
 
 import random
 import bottle
 import json
 import os
-
-_db_lock = Lock()
 
 @bottle.route('/static/<path:path>')
 def static(path):

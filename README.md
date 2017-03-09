@@ -1,4 +1,6 @@
-# BtAS - Better than Alexsiy's Snake
+# BtAS - Better than Aleksiy's Snake
+
+🥇 first place winner of Battlesnake 2017 advanced division 🎉
 
 #### who wrote me
 
@@ -19,9 +21,9 @@ This was the basic concept, but there were a lot of overrides – We made some s
 
 We were initially concerned about the 200ms response time limit. Following, we decided to avoid more complex algorithms such as Minimax or A*. However, the average response time for our snake on "production" hardware turned out to be ~30ms.
 
-#### who's Alexisy?
+#### who's Aleksiy?
 
-Alexsiy is a Spring 2017 co-op at Rdbrck. He wrote [a competing battlesnake](https://github.com/aleksiy325/snek) in C++.
+Aleksiy is a Spring 2017 co-op at Redbrick. He wrote [a competing battlesnake](https://github.com/aleksiy325/snek) in C++.
 
 #### hardware and environment
 
